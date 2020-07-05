@@ -1,24 +1,62 @@
 import React from 'react';
-import logo from './logo.svg';
 import './App.css';
 
 function App() {
+  let games = [
+  {
+    name: "COD",
+    type: "FPS"
+  },
+  {
+    name: "LOL",
+    type: "RPG"
+  },
+  {
+    name: "WOT",
+    type: "Strategy"
+  },
+  {
+    name: "Valorant",
+    type: "FPS"
+  }];
+
+  let fps = games.filter((game) => {
+    return game.type === "FPS" ? game : null
+  })
+  let rpg = games.filter((game) => {
+    return game.type === "RPG" ? game : null
+  })
+  let strategy = games.filter((game) => {
+    return game.type === "Strategy" ? game : null
+  })
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <h1>Games</h1>
+      <h2>FPS:</h2>
+      <ul className="fps">
+      {
+          fps.map((game) => {
+          return(<li>Nev: {game.name}, tipus: {game.type}</li>)
+          })
+        }
+      </ul>
+      <h2>RPG:</h2>
+      <ul className="rpg">
+      {
+          rpg.map((game) => {
+          return(<li>Nev: {game.name}, tipus: {game.type}</li>)
+          })
+        }
+      </ul>
+      <h2>Strategy:</h2>
+      <ul className="stgy">
+      {
+          strategy.map((game) => {
+          return(<li>Nev: {game.name}, tipus: {game.type}</li>)
+          })
+        }
+      </ul>
     </div>
   );
 }
