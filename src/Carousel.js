@@ -8,7 +8,7 @@ class ClassCarousel extends Component {
                 <Carousel.Item>
                     <Image
                     className="d-block w-100 h-100"
-                    src="img/fortnite.jpg"
+                    src="./img/fortnite.jpg"
                     alt="First slide"
                     />
                     <Carousel.Caption>
@@ -20,7 +20,7 @@ class ClassCarousel extends Component {
                 <Carousel.Item>
                     <Image
                     className="d-block w-100 h-100"
-                    src="img/lol.jpg"
+                    src="./img/lol.jpg"
                     alt="Second slide"
                     />
 
@@ -33,7 +33,7 @@ class ClassCarousel extends Component {
                 <Carousel.Item>
                     <Image
                     className="d-block w-100 h-100"
-                    src="img/valorant.jpg"
+                    src="./img/valorant.jpg"
                     alt="Third slide"
                     />
 
