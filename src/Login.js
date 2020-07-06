@@ -1,11 +1,12 @@
-import React, { Component } from 'react'
-import { Form, Col, Button , Container, Alert} from 'react-bootstrap'
+import React, { Component } from 'react';
+import { Form, Col, Button , Container, Alert} from 'react-bootstrap';
+import './Login.scss';
 
 class Login extends Component {
     render(){
         return(
             <Form>
-                <Container className="wrapper">
+                <Container className="wrapper-login">
                     <Form.Group  controlId="formHorizontalEmail">
                         <Form.Label column>
                         Username

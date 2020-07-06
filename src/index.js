@@ -1,21 +1,11 @@
 import React from 'react';
 import {render} from 'react-dom';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import './index.css';
-import ClassNavbar from './Navbar';
-import ClassSidebar from './Sidebar';
-import ClassCarousel from './Carousel';
-import Register from './Register';
-import Login from './Login';
 import * as serviceWorker from './serviceWorker';
+import App from './App';
 
 render(
   <React.StrictMode>
-    <ClassNavbar />
-    <ClassCarousel />
-    <ClassSidebar />
-    <Login />
-    {/* <Register /> */}
+    <App />
   </React.StrictMode>,
   document.getElementById('root')
 );

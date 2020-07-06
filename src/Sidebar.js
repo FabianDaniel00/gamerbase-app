@@ -1,37 +1,88 @@
-import {Nav, NavItem, Button, Glyphicon} from 'react-bootstrap';
+import React, { Component, NavItem, Link , onClick} from 'react';
+import styled from 'styled-components';
+import './Sidebar.scss';
 
-import React, {Component} from 'react';
-
-import Sidebar from 'react-bootstrap-sidebar';
-
-export default class ClassSidebar extends Component {
-
+class Sidebar extends Component {
     constructor(props) {
         super(props);
-
         this.state = {
-          isVisible: false,
-        };
+            activePath: "/",
+            items: [
+                {
+                    path: '/', /* path is used as id to check which NavItem is active basically */
+                    name: 'Home',
+                    css: 'fa fa-fw fa-home',
+                    key: 1 /* Key is required, else console throws error. Does this please you Mr. Browser?! */
+                  },
+                  {
+                    path: '/about',
+                    name: 'About',
+                    css: 'fa fa-fw fa-clock',
+                    key: 2
+                  },
+                  {
+                    path: '/NoMatch',
+                    name: 'NoMatch',
+                    css: 'fas fa-hashtag',
+                    key: 3
+                  },
+            ]
+        }
     }
 
-    updateModal(isVisible) {
-    	this.state.isVisible = isVisible;
-      this.forceUpdate();
+    onItemClick = (path) => {
+        this.setState({ activePath:path});
     }
-
     render() {
-        return (
-            <div>
-                <Button bsStyle="primary" onClick={ () => this.updateModal(true) }><Glyphicon glyph="menu-hamburger"/></Button>
-                <Sidebar side='left' isVisible={ this.state.isVisible } onHide={ () => this.updateModal(false) }>
-                    <Nav>
-                    <NavItem href="#">Link 1</NavItem>
-                    <NavItem href="#">Link 2</NavItem>
-                    <NavItem href="#">Link 3</NavItem>
-                    <NavItem href="#">Link 4</NavItem>
-                    </Nav>
-                </Sidebar>
+        const { items, activePath } = this.state;
+        return(
+            <div className="side-nav">
+                {
+                    /* items = just array AND map() loops thru that array AND item is param of that loop */
+                    items.map((item) => {
+                    /* Return however many NavItems in array to be rendered */
+                    return (
+                        <NavItem
+                            path={item.path}
+                            name={item.name}
+                            css={item.css}
+                            onItemClick={this.onItemClick} /* Simply passed an entire function to onClick prop */ active={item.path === activePath} key={item.key}/>
+                    )
+                    })
+                }
             </div>
         );
     }
 }
+
+class Navitem extends Component {
+    handleClick = () => {
+        const{ path, onclick } = this.props;
+        onClick(path);
+    }
+    render() {
+        const { active } = this.props;
+        return(
+            <div active={ active } className="side-nav">
+                <Link to={this.props.path} className={this.props.css} onclick={this.handleClick}></Link>
+            </div>
+        );
+    }
+}
+
+export default Sidebar;
+
+const StyledNavItem = styled.div`
+  height: 70px;
+  width: 75px; /* width must be same size as NavBar to center */
+  text-align: center; /* Aligns <a> inside of NavIcon div */
+  margin-bottom: 0;   /* Puts space between NavItems */
+  a {
+    font-size: 2.7em;
+    color: ${(props) => props.active ? "white" : "#9FFFCB"};
+    :hover {
+      opacity: 0.7;
+      text-decoration: none; /* Gets rid of underlining of icons */
+    }  
+  }
+`;
