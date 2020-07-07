@@ -7,6 +7,7 @@ const Styles = styled.div`
   a, .navbar-nav, .navbar-light .nav-link {
     color: #9FFFCB;
     &:hover { color: white; }
+    z-index: 1;
   }
   .navbar-brand {
     font-size: 1.4em;
@@ -15,7 +16,7 @@ const Styles = styled.div`
   }
   .form-center {
     position: absolute !important;
-    left: 25%;
+    left: 220px;
     right: 25%;
   }
 `;
@@ -26,7 +27,7 @@ export const NavigationBar = () => (
       <Navbar.Brand href="/">GamerBaseDotNet</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
       <Form className="form-center">
-        <FormControl type="text" placeholder="Search" className="" />
+        <FormControl type="text" placeholder="Search" />
       </Form>
       <Navbar.Collapse id="basic-navbar-nav">
         <Nav className="ml-auto">
