@@ -2,7 +2,13 @@ import React from 'react';
 import styled from 'styled-components';
 
 const GridWrapper = styled.div`
-  margin: 10px;
+  display: grid;
+  grid-gap: 10px;
+  margin-top: 1em;
+  margin-left: 3em;
+  margin-right: 3em;
+  grid-template-columns: repeat(12, 1fr);
+  grid-auto-rows: minmax(25px, auto);
 `; 
 
 export const About = () => (

@@ -4,10 +4,10 @@ import styled from 'styled-components';
 
 const Styles = styled.div`
   .navbar { background-color: #222; }
-  a, .navbar-nav, .navbar-light .nav-link {
+  a, .navbar-nav, .navbar-dark .nav-link {
     color: #9FFFCB;
     &:hover { color: white; }
-    z-index: 1;
+    // z-index: 1;
   }
   .navbar-brand {
     font-size: 1.4em;
@@ -23,7 +23,7 @@ const Styles = styled.div`
 
 export const NavigationBar = () => (
   <Styles>
-    <Navbar expand="lg">
+    <Navbar expand="lg" variant="dark">
       <Navbar.Brand href="/">GamerBaseDotNet</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
       <Form className="form-center">
