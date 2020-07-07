@@ -4,14 +4,23 @@ import { Link, withRouter } from 'react-router-dom';
 
 /* This defines the actual bar going down the screen */
 const StyledSideNav = styled.div`
+    position: sticky;
+    -webkit-position: sticky;
+    width: 75px;     /* Set the width of the sidebar */
+    z-index: 1;      /* Stay on top of everything */
+    top: 0;      /* Stay at the top */
+    background-color: #222; /* Black */
+    overflow-x: hidden;     /* Disable horizontal scroll */
+    padding-top: 10px;
+    float: left;
+`;
+
+const StyledSideNavBar = styled.div`
     position: fixed;     /* Fixed Sidebar (stay in place on scroll and position relative to viewport) */
     height: 100%;
     width: 75px;     /* Set the width of the sidebar */
-    // z-index: 1;      /* Stay on top of everything */
-    // top: 0;      /* Stay at the top */
     background-color: #222; /* Black */
     overflow-x: hidden;     /* Disable horizontal scroll */
-    padding-top: 70px;
 `;
 
 class SideNav extends Component {
@@ -55,20 +64,23 @@ class SideNav extends Component {
     render () {
         const { items, activePath } = this.state;
         return (
-            <StyledSideNav>
-                {
-                    items.map((item) => {
-                        return (
-                            <NavItem path={item.path}
-                            name={item.name}
-                            css={item.css}
-                            onItemClick={this.onItemClick} /* Simply passed an entire function to onClick prop */
-                            active={item.path === activePath}
-                            key={item.key}/>
-                        )
-                    })
-                }
-            </StyledSideNav>
+            <>
+                <StyledSideNavBar />
+                <StyledSideNav>
+                    {
+                        items.map((item) => {
+                            return (
+                                <NavItem path={item.path}
+                                name={item.name}
+                                css={item.css}
+                                onItemClick={this.onItemClick} /* Simply passed an entire function to onClick prop */
+                                active={item.path === activePath}
+                                key={item.key}/>
+                            )
+                        })
+                    }
+                </StyledSideNav>
+            </>
         );
     }
 }

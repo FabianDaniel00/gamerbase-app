@@ -14,9 +14,9 @@ function App() {
     return(
         <React.Fragment>
             <Router>
-                 <Sidebar />
                 <NavigationBar />
-                <div className="grid-wrapper">
+                <Sidebar />
+                <div className="content-wrapper">
                     <ClassCarousel />
                     <Switch>
                         <Route exact path="/" component={ Home } />
