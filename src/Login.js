@@ -1,25 +1,16 @@
-import React from 'react'
-import { Form, Col, Button , Container} from 'react-bootstrap'
-import './Login.scss';
+import React from 'react';
+import { Form, Col, Button , Container, Alert} from 'react-bootstrap';
+import './Form.scss';
 
-export const Register = (props) => (
+export const Login = () => (
     <Form>
-        <Container className="wrapper-login">
-            <Form.Group  controlId="formHorizontalEmail">
+        <Container className="form-wrapper">
+            <Form.Group  controlId="formHorizontalUsername">
                 <Form.Label column>
                 Username
                 </Form.Label>
                 <Col>
                     <Form.Control type="text" placeholder="Username" />
-                </Col>
-            </Form.Group>
-
-            <Form.Group  controlId="formHorizontalEmail">
-                <Form.Label column>
-                Email
-                </Form.Label>
-                <Col>
-                    <Form.Control type="email" placeholder="email@adress.com" />
                 </Col>
             </Form.Group>
 
@@ -37,7 +28,7 @@ export const Register = (props) => (
                     <Form.Check
                     type="checkbox"
                     className="my-1 mr-sm-2"
-                    id="rememberme"
+                    id="customControlInline"
                     label="Remember me"
                     custom
                     />
@@ -46,7 +37,14 @@ export const Register = (props) => (
 
             <Form.Group>
                 <Col>
-                    <Button type="submit" block>Sign up</Button>
+                    If you don't have an account,
+                    <Alert.Link href="/signup"> click here</Alert.Link> to create.
+                </Col>
+            </Form.Group>
+
+            <Form.Group>
+                <Col>
+                    <Button type="submit" block>Login</Button>
                 </Col>
             </Form.Group>
         </Container>
