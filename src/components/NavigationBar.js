@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { Component } from 'react';
 import { Nav, Navbar, Form, FormControl } from 'react-bootstrap';
 import styled from 'styled-components';
 
@@ -7,7 +7,6 @@ const Styles = styled.div`
   a, .navbar-nav, .navbar-dark .nav-link {
     color: #9FFFCB;
     &:hover { color: white; }
-    // z-index: 1;
   }
   .navbar-brand {
     font-size: 1.4em;
@@ -16,15 +15,17 @@ const Styles = styled.div`
   }
   .form-center {
     position: absolute !important;
-    left: 220px;
+    left: 160px;
     right: 25%;
   }
 `;
 
-export const NavigationBar = () => (
-  <Styles>
+class NavigationBar extends Component {
+  render() {
+    return (
+      <Styles>
     <Navbar expand="lg" variant="dark">
-      <Navbar.Brand href="/">GamerBaseDotNet</Navbar.Brand>
+      <Navbar.Brand href="/">GamerBase</Navbar.Brand>
       <Navbar.Toggle aria-controls="basic-navbar-nav"/>
       <Form className="form-center">
         <FormControl type="text" placeholder="Search" />
@@ -39,4 +40,8 @@ export const NavigationBar = () => (
       </Navbar.Collapse>
     </Navbar>
   </Styles>
-)
+    );
+  }
+}
+
+export default NavigationBar;

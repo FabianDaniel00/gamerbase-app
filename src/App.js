@@ -1,30 +1,36 @@
 import React from 'react';
 import './App.scss';
+import NavigationBar from './components/NavigationBar';
 import Sidebar from './components/Sidebar';
 import ClassCarousel from './components/Carousel';
+import Footer from './components/Footer';
 import { Login } from './Login';
 import { Register} from './Register';
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
-import { NavigationBar } from './components/NavigationBar';
 import { Home } from './Home';
 import { About } from './About';
 import { NoMatch } from './NoMatch';
+import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
 
 function App() {
     return(
         <React.Fragment>
             <Router>
-                <NavigationBar />
-                <Sidebar />
-                <div className="content-wrapper">
-                    <ClassCarousel />
-                    <Switch>
-                        <Route exact path="/" component={ Home } />
-                        <Route path="/login" component={ Login } />
-                        <Route path="/signup" component={ Register } />
-                        <Route path="/about" component={ About } />
-                        <Route component={ NoMatch } />
-                    </Switch>
+                <div className="sticky-navbar">
+                    <NavigationBar />
+                </div>
+                <div className="height">
+                    <Sidebar />
+                    <div className="content-wrapper">
+                        <ClassCarousel />
+                        <Switch>
+                            <Route exact path="/" component={ Home } />
+                            <Route path="/login" component={ Login } />
+                            <Route path="/signup" component={ Register } />
+                            <Route path="/about" component={ About } />
+                            <Route component={ NoMatch } />
+                        </Switch>
+                    </div>
+                    <Footer />
                 </div>
             </Router>
         </React.Fragment>

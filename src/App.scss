@@ -1,6 +1,6 @@
 $primary: green;
 
-@import 'node_modules/bootstrap/scss/bootstrap';
+@import './node_modules/bootstrap/scss/bootstrap.scss';
 
 body {
   margin: 0;
@@ -17,4 +17,22 @@ code {
 }
 .content-wrapper {
   margin-left: 75px;
+  position: relative;
+}
+
+.height {
+  position: relative;
+}
+
+@media (max-width: 500px) {
+  .content-wrapper{
+    margin: 0;
+  }
+
+  .sticky-navbar{
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    opacity: 90%;
+  }
 }
