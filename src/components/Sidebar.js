@@ -1,27 +1,7 @@
 import React, { Component } from 'react';
 import styled from 'styled-components';
 import { Link, withRouter } from 'react-router-dom';
-
-/* This defines the actual bar going down the screen */
-const StyledSideNav = styled.div`
-    position: sticky;
-    -webkit-position: sticky;
-    width: 75px;     /* Set the width of the sidebar */
-    z-index: 1;      /* Stay on top of everything */
-    top: 0;      /* Stay at the top */
-    background-color: #222; /* Black */
-    overflow-x: hidden;     /* Disable horizontal scroll */
-    padding-top: 10px;
-    float: left;
-`;
-
-const StyledSideNavBar = styled.div`
-    position: fixed;     /* Fixed Sidebar (stay in place on scroll and position relative to viewport) */
-    height: 100%;
-    width: 75px;     /* Set the width of the sidebar */
-    background-color: #222; /* Black */
-    overflow-x: hidden;     /* Disable horizontal scroll */
-`;
+import './Sidebar.scss';
 
 class SideNav extends Component {
     constructor (props) {
@@ -65,8 +45,8 @@ class SideNav extends Component {
         const { items, activePath } = this.state;
         return (
             <>
-                <StyledSideNavBar />
-                <StyledSideNav>
+                <div className="sidenavbar" />
+                <div className ="sticky-top sidenav">
                     {
                         items.map((item) => {
                             return (
@@ -79,7 +59,7 @@ class SideNav extends Component {
                             )
                         })
                     }
-                </StyledSideNav>
+                </div>
             </>
         );
     }
