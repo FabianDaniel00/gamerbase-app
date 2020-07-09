@@ -1,4 +1,4 @@
-import React, { useState, render, Component } from 'react';
+import React, { useState, Component } from 'react';
 import styled from 'styled-components';
 import { Link, withRouter } from 'react-router-dom';
 import { Dropdown, FormControl } from 'react-bootstrap';
@@ -63,7 +63,9 @@ class SideNav extends Component {
                         items.map((item) => {
                             if (item.isDropdown) {
                                 return (
-                                    <CustomDropdownButton />
+                                    <CustomNavItem name={item.name}
+                                    css={item.css}
+                                    key={item.key}/>
                                 )
                             }
                             else {
@@ -121,86 +123,84 @@ class NavItem extends Component {
     }
 }
 
+class CustomNavItem extends Component {
+    render() {
+        const { active } = this.props;
+        return(
+            <StyledNavItem active = { active }>
+                <Link className = { this.props.css }>
+                    <div className="navicon">{ this.props.name }</div>
+                </Link>
+                <CustomDropdownButton />
+            </StyledNavItem>
+        );
+    }
+}
+
 // The forwardRef is important!!
 // Dropdown needs access to the DOM node in order to position the Menu
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     <a
-        href=""
-        ref={ref}
-        onClick={(e) => {
+      href=""
+      ref={ref}
+      onClick={(e) => {
         e.preventDefault();
         onClick(e);
-        }}
+      }}
     >
-        {children}
-        {/* &#x25bc; */}
+      {children}
+      &#x25bc;
     </a>
-));
+  ));
     
-    // forwardRef again here!
-    // Dropdown needs access to the DOM of the Menu to measure it
+// forwardRef again here!
+// Dropdown needs access to the DOM of the Menu to measure it
 const CustomMenu = React.forwardRef(
     ({ children, style, className, 'aria-labelledby': labeledBy }, ref) => {
-        const [value, setValue] = useState('');
-    
-        return (
+      const [value, setValue] = useState('');
+  
+      return (
         <div
-            ref={ref}
-            style={style}
-            className={className}
-            aria-labelledby={labeledBy}
+          ref={ref}
+          style={style}
+          className={className}
+          aria-labelledby={labeledBy}
         >
-            <FormControl
+          <FormControl
             autoFocus
             className="mx-3 my-2 w-auto"
             placeholder="Type to filter..."
             onChange={(e) => setValue(e.target.value)}
             value={value}
-            />
-            <ul className="list-unstyled">
+          />
+          <ul className="list-unstyled">
             {React.Children.toArray(children).filter(
-                (child) =>
+              (child) =>
                 !value || child.props.children.toLowerCase().startsWith(value),
             )}
-            </ul>
+          </ul>
         </div>
-        );
+      );
     },
 );
-
-const CustomStyledNavItem = styled.div`
-    height: 70px;
-    width: 75px; /* width must be same size as NavBar to center */
-    text-align: center; /* Aligns <a> inside of NavIcon div */
-    margin-bottom: 10px;   /* Puts space between NavItems */
-    // font-family: "Times New Roman", Times, serif;
-    a {
-      font-size: 13px;
-      color: #9FFFCB;
-      :hover {
-        opacity: 0.7;
-        text-decoration: none; /* Gets rid of underlining of icons */
-      }  
-    }
-`;
 
 class CustomDropdownButton extends Component {
     render() {
         return(
-            <CustomStyledNavItem>
-                <Dropdown drop="right">
-                    <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
-                    Categories
-                    </Dropdown.Toggle>
-
-                    <Dropdown.Menu as={CustomMenu}>
-                    <Dropdown.Item eventKey="1">Red</Dropdown.Item>
-                    <Dropdown.Item eventKey="2">Blue</Dropdown.Item>
-                    <Dropdown.Item eventKey="3" active>Orange</Dropdown.Item>
-                    <Dropdown.Item eventKey="1">Red-Orange</Dropdown.Item>
-                    </Dropdown.Menu>
-                </Dropdown>
-            </CustomStyledNavItem>
+            <Dropdown>
+                <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
+                Custom toggle
+                </Dropdown.Toggle>
+            
+                <Dropdown.Menu as={CustomMenu}>
+                <Dropdown.Item eventKey="1">Red</Dropdown.Item>
+                <Dropdown.Item eventKey="2">Blue</Dropdown.Item>
+                <Dropdown.Item eventKey="3" active>
+                    Orange
+                </Dropdown.Item>
+                <Dropdown.Item eventKey="1">Red-Orange</Dropdown.Item>
+                </Dropdown.Menu>
+            </Dropdown>
         );
     }
 }
