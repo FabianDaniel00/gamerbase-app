@@ -1,5 +1,5 @@
 import React from 'react'
-import { Form, Col, Button , Container} from 'react-bootstrap'
+import { Form, Col, Button , Container, Alert} from 'react-bootstrap'
 import './Form.scss';
 
 export const Register = (props) => (
@@ -41,6 +41,13 @@ export const Register = (props) => (
                     label="Remember me"
                     custom
                     />
+                </Col>
+            </Form.Group>
+
+            <Form.Group>
+                <Col>
+                    If you already have an account,
+                    <Alert.Link href="/login"> click here</Alert.Link> to login.
                 </Col>
             </Form.Group>
 

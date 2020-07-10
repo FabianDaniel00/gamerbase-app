@@ -35,8 +35,6 @@ class SideNav extends Component {
                     key: 4
                 },
                 {
-                    name: 'Categories',
-                    css: 'fa fa-angle-right',
                     key: 5,
                     isDropdown: true
                     // children: [
@@ -63,9 +61,7 @@ class SideNav extends Component {
                         items.map((item) => {
                             if (item.isDropdown) {
                                 return (
-                                    <CustomNavItem name={item.name}
-                                    css={item.css}
-                                    key={item.key}/>
+                                    <CustomNavItem key={item.key}/>
                                 )
                             }
                             else {
@@ -110,13 +106,13 @@ class NavItem extends Component {
     }
 
     render() {
-        const { active } = this.props;
+        const { active, path, css, name } = this.props;
         return(
             <StyledNavItem active = { active }>
-                <Link to = { this.props.path }
-                className = { this.props.css }
+                <Link to = { path }
+                className = { css }
                 onClick = { this.handleClick }>
-                    <div className="navicon">{ this.props.name }</div>
+                    <div className="navicon">{ name }</div>
                 </Link>
             </StyledNavItem>
         );
@@ -125,12 +121,8 @@ class NavItem extends Component {
 
 class CustomNavItem extends Component {
     render() {
-        const { active } = this.props;
         return(
-            <StyledNavItem active = { active }>
-                <Link className = { this.props.css }>
-                    <div className="navicon">{ this.props.name }</div>
-                </Link>
+            <StyledNavItem>
                 <CustomDropdownButton />
             </StyledNavItem>
         );
@@ -141,17 +133,17 @@ class CustomNavItem extends Component {
 // Dropdown needs access to the DOM node in order to position the Menu
 const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
     <a
-      href=""
-      ref={ref}
-      onClick={(e) => {
-        e.preventDefault();
-        onClick(e);
-      }}
-    >
-      {children}
-      &#x25bc;
+        href=""
+        ref={ref}
+        onClick={(e) => {
+            e.preventDefault();
+            onClick(e);
+        }
+    }>
+        {children}
     </a>
-  ));
+    )
+);
     
 // forwardRef again here!
 // Dropdown needs access to the DOM of the Menu to measure it
@@ -166,17 +158,10 @@ const CustomMenu = React.forwardRef(
           className={className}
           aria-labelledby={labeledBy}
         >
-          <FormControl
-            autoFocus
-            className="mx-3 my-2 w-auto"
-            placeholder="Type to filter..."
-            onChange={(e) => setValue(e.target.value)}
-            value={value}
-          />
           <ul className="list-unstyled">
             {React.Children.toArray(children).filter(
               (child) =>
-                !value || child.props.children.toLowerCase().startsWith(value),
+                !value || child.props.children.toLowerCase().startsWith(value) || child.props.children.toUpperCase().startsWith(value),
             )}
           </ul>
         </div>
@@ -187,18 +172,19 @@ const CustomMenu = React.forwardRef(
 class CustomDropdownButton extends Component {
     render() {
         return(
-            <Dropdown>
+            <Dropdown drop="right">
                 <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
-                Custom toggle
+                    <i class="fas fa-chevron-circle-right">
+                        <div className="categories">Categories</div>
+                    </i>
                 </Dropdown.Toggle>
             
                 <Dropdown.Menu as={CustomMenu}>
-                <Dropdown.Item eventKey="1">Red</Dropdown.Item>
-                <Dropdown.Item eventKey="2">Blue</Dropdown.Item>
-                <Dropdown.Item eventKey="3" active>
-                    Orange
-                </Dropdown.Item>
-                <Dropdown.Item eventKey="1">Red-Orange</Dropdown.Item>
+                    <Dropdown.Item eventKey="1" href="#action/3.1"><div className="dropdown-item">FPS</div></Dropdown.Item>
+                    <Dropdown.Item eventKey="2" href="#action/3.2"><div className="dropdown-item">MMORPG</div></Dropdown.Item>
+                    <Dropdown.Item eventKey="3" href="#action/3.3"><div className="dropdown-item">Strategy</div></Dropdown.Item>
+                    <Dropdown.Divider />
+                    <Dropdown.Item eventKey="4" href="#action/3.4"><div className="dropdown-item">Other</div></Dropdown.Item>
                 </Dropdown.Menu>
             </Dropdown>
         );
