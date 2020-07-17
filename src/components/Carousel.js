@@ -1,10 +1,11 @@
 import React, { Component } from "react";
 import { Carousel, Image } from "react-bootstrap";
+import "./Carousel.scss";
 
 class ClassCarousel extends Component {
   render() {
     return (
-      <Carousel>
+      <Carousel className="back">
         <Carousel.Item>
           <Image
             className="d-block w-100 h-100"

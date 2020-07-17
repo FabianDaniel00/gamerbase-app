@@ -35,13 +35,33 @@
   font-family: "Times New Roman", Times, serif;
 }
 
-.dropdown-item {
-  font-size: 13px;
+.dropdown-items {
   color: #222;
+  font-size: 15px;
+  width: 90px;
   &:hover {
     background-color: #4d4d4d;
     color: white;
   }
+}
+
+.buttons {
+  margin-left: 5px;
+  &:hover {
+    background-color: #4d4d4d;
+    color: white;
+  }
+}
+
+.d-buttons {
+  width: calc(100% - 5px);
+  position: relative;
+  z-index: 1;
+}
+
+.item-hover:hover {
+  background-color: #4d4d4d;
+  color: white;
 }
 
 @media (max-width: 500px) {

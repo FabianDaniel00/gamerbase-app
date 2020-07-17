@@ -5,7 +5,7 @@ import "./Form.scss";
 export const Register = (props) => (
   <Form>
     <Container className="form-wrapper">
-      <Form.Group controlId="formHorizontalEmail">
+      <Form.Group controlId="formHorizontalUsername">
         <Form.Label column>Username</Form.Label>
         <Col>
           <Form.Control type="text" placeholder="Username" />

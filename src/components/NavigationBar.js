@@ -6,6 +6,8 @@ import {
   FormControl,
   NavDropdown,
   Dropdown,
+  Button,
+  ButtonGroup,
 } from "react-bootstrap";
 import styled from "styled-components";
 
@@ -32,13 +34,29 @@ const Styles = styled.div`
   }
 
   .form-center {
-    position: absolute !important;
+    position: absolute;
     left: 270px;
     right: 25%;
     max-width: 430px;
+    z-index: 0;
   }
 
   .navdropdown-item {
+    color: #222;
+    width: 100%;
+    margin-left: 5px;
+    &:hover {
+      background-color: #4d4d4d;
+      color: white;
+    }
+  }
+
+  .navdropdown {
+    width: calc(100% - 5px);
+    z-index: 2;
+  }
+
+  .dropdown-item {
     color: #222;
     &:hover {
       background-color: #4d4d4d;
@@ -51,9 +69,7 @@ const Styles = styled.div`
     margin: 0px 0px 0px 10px;
   }
 
-  .dropdown-item {
-    font-size: 13px;
-    color: #222;
+  .d-item {
     &:hover {
       background-color: #4d4d4d;
       color: white;
@@ -69,11 +85,8 @@ const Styles = styled.div`
 `;
 
 class NavigationBar extends Component {
-  state = {
-    categories: ["FPS", "MMORPG", "Strategy"],
-  };
   render() {
-    const { categories } = this.state;
+    const { categories, games } = this.props;
     return (
       <Styles>
         <Navbar collapseOnSelect expand="lg" variant="dark">
@@ -84,22 +97,44 @@ class NavigationBar extends Component {
               <NavDropdown title="Categories" id="collasible-nav-dropdown">
                 {categories.map((category, key) => {
                   return (
-                    <NavDropdown.Item
+                    <Dropdown
+                      className="navdropdown"
                       key={key}
-                      className="navdropdown-item"
-                      href="#action/3.1"
+                      drop="right"
+                      as={ButtonGroup}
                     >
-                      {category}
-                    </NavDropdown.Item>
+                      <Button
+                        className="navdropdown-item"
+                        href={category.url}
+                        variant="secondary"
+                      >
+                        {category.name}
+                      </Button>
+
+                      <Dropdown.Toggle
+                        split
+                        variant="secondary"
+                        id="dropdown-split-basic"
+                      />
+
+                      <Dropdown.Menu>
+                        {games
+                          .filter((game) => game.category === category.name)
+                          .map((filteredGame, key) => {
+                            return (
+                              <Dropdown.Item
+                                className="d-item"
+                                key={key}
+                                href={filteredGame.url}
+                              >
+                                {filteredGame.name}
+                              </Dropdown.Item>
+                            );
+                          })}
+                      </Dropdown.Menu>
+                    </Dropdown>
                   );
                 })}
-                <NavDropdown.Divider />
-                <NavDropdown.Item
-                  className="navdropdown-item"
-                  href="#action/3.4"
-                >
-                  Other
-                </NavDropdown.Item>
               </NavDropdown>
             </Nav>
             <Nav>
@@ -140,7 +175,7 @@ const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
 // Dropdown needs access to the DOM of the Menu to measure it
 const CustomMenu = React.forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
-    const [value, setValue] = useState("");
+    const [value] = useState("");
 
     return (
       <div
@@ -150,12 +185,7 @@ const CustomMenu = React.forwardRef(
         aria-labelledby={labeledBy}
       >
         <ul className="list-unstyled">
-          {React.Children.toArray(children).filter(
-            (child) =>
-              !value ||
-              child.props.children.toLowerCase().startsWith(value) ||
-              child.props.children.toUpperCase().startsWith(value)
-          )}
+          {React.Children.toArray(children).filter(() => !value)}
         </ul>
       </div>
     );
@@ -173,15 +203,15 @@ class CustomDropdownButton extends Component {
         </Dropdown.Toggle>
 
         <Dropdown.Menu as={CustomMenu}>
-          <Dropdown.Item eventKey="1" href="#action/3.1">
-            <div className="dropdown-item">My profile</div>
+          <Dropdown.Item className="operator-menu" key="1" href="#action/3.1">
+            My profile
           </Dropdown.Item>
-          <Dropdown.Item eventKey="2" href="#action/3.2">
-            <div className="dropdown-item">Settings</div>
+          <Dropdown.Item className="operator-menu" key="2" href="#action/3.2">
+            Settings
           </Dropdown.Item>
           <Dropdown.Divider />
-          <Dropdown.Item eventKey="4" href="#action/3.4">
-            <div className="dropdown-item">Log out</div>
+          <Dropdown.Item className="operator-menu" key="3" href="#action/3.4">
+            Log out
           </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>

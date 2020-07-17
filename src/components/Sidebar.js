@@ -1,7 +1,7 @@
 import React, { useState, Component } from "react";
 import styled from "styled-components";
 import { Link, withRouter } from "react-router-dom";
-import { Dropdown } from "react-bootstrap";
+import { Dropdown, ButtonGroup, Button } from "react-bootstrap";
 import "./Sidebar.scss";
 
 class SideNav extends Component {
@@ -51,8 +51,8 @@ class SideNav extends Component {
   onItemClick = (path) => {
     this.setState({ activePath: path });
   };
-
   render() {
+    const { categories, games } = this.props;
     const { items, activePath } = this.state;
     return (
       <>
@@ -60,7 +60,13 @@ class SideNav extends Component {
         <div className="sticky-top sidenav">
           {items.map((item) => {
             if (item.isDropdown) {
-              return <CustomNavItem key={item.key} />;
+              return (
+                <CustomNavItem
+                  categories={categories}
+                  games={games}
+                  key={item.key}
+                />
+              );
             } else {
               return (
                 <NavItem
@@ -119,9 +125,10 @@ class NavItem extends Component {
 
 class CustomNavItem extends Component {
   render() {
+    const { categories, games } = this.props;
     return (
       <StyledNavItem>
-        <CustomDropdownButton />
+        <CustomDropdownButton categories={categories} games={games} />
       </StyledNavItem>
     );
   }
@@ -146,7 +153,7 @@ const CustomToggle = React.forwardRef(({ children, onClick }, ref) => (
 // Dropdown needs access to the DOM of the Menu to measure it
 const CustomMenu = React.forwardRef(
   ({ children, style, className, "aria-labelledby": labeledBy }, ref) => {
-    const [value, setValue] = useState("");
+    const [value] = useState("");
 
     return (
       <div
@@ -156,12 +163,7 @@ const CustomMenu = React.forwardRef(
         aria-labelledby={labeledBy}
       >
         <ul className="list-unstyled">
-          {React.Children.toArray(children).filter(
-            (child) =>
-              !value ||
-              child.props.children.toLowerCase().startsWith(value) ||
-              child.props.children.toUpperCase().startsWith(value)
-          )}
+          {React.Children.toArray(children).filter(() => !value)}
         </ul>
       </div>
     );
@@ -169,11 +171,8 @@ const CustomMenu = React.forwardRef(
 );
 
 class CustomDropdownButton extends Component {
-  state = {
-    categories: ["FPS", "MMORPG", "Strategy"],
-  };
   render() {
-    const { categories } = this.state;
+    const { categories, games } = this.props;
     return (
       <Dropdown drop="right">
         <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
@@ -184,15 +183,46 @@ class CustomDropdownButton extends Component {
         <Dropdown.Menu as={CustomMenu}>
           {categories.map((category, key) => {
             return (
-              <Dropdown.Item eventKey={key} href="#action/3.1">
-                <div className="dropdown-item">{category}</div>
-              </Dropdown.Item>
+              <Dropdown
+                className="d-buttons"
+                key={key}
+                drop="right"
+                as={ButtonGroup}
+              >
+                <Button
+                  className="buttons"
+                  href={category.url}
+                  variant="secondary"
+                >
+                  <div className="dropdown-items">{category.name}</div>
+                </Button>
+
+                <Dropdown.Toggle
+                  split
+                  variant="secondary"
+                  id="dropdown-split-basic"
+                />
+
+                <Dropdown.Menu>
+                  {games
+                    .filter((game) => game.category === category.name)
+                    .map((filteredGame, key) => {
+                      return (
+                        <Dropdown.Item
+                          className="item-hover"
+                          key={key}
+                          href={filteredGame.url}
+                        >
+                          <div className="dropdown-items d-buttons">
+                            {filteredGame.name}
+                          </div>
+                        </Dropdown.Item>
+                      );
+                    })}
+                </Dropdown.Menu>
+              </Dropdown>
             );
           })}
-          <Dropdown.Divider />
-          <Dropdown.Item eventKey="4" href="#action/3.4">
-            <div className="dropdown-item">Other</div>
-          </Dropdown.Item>
         </Dropdown.Menu>
       </Dropdown>
     );
@@ -201,6 +231,7 @@ class CustomDropdownButton extends Component {
 
 export default class Sidebar extends Component {
   render() {
-    return <RouterSideNav />;
+    const { categories, games } = this.props;
+    return <RouterSideNav categories={categories} games={games} />;
   }
 }
