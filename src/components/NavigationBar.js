@@ -105,7 +105,7 @@ class NavigationBar extends Component {
                     >
                       <Button
                         className="navdropdown-item"
-                        href={category.url}
+                        href={`categories/${category.slug}`}
                         variant="secondary"
                       >
                         {category.name}
@@ -119,13 +119,15 @@ class NavigationBar extends Component {
 
                       <Dropdown.Menu>
                         {games
-                          .filter((game) => game.category === category.name)
+                          .filter(
+                            (game) => game.category.name === category.name
+                          )
                           .map((filteredGame, key) => {
                             return (
                               <Dropdown.Item
                                 className="d-item"
                                 key={key}
-                                href={filteredGame.url}
+                                href={`games/${filteredGame.slug}`}
                               >
                                 {filteredGame.name}
                               </Dropdown.Item>
@@ -210,7 +212,7 @@ class CustomDropdownButton extends Component {
             Settings
           </Dropdown.Item>
           <Dropdown.Divider />
-          <Dropdown.Item className="operator-menu" key="3" href="#action/3.4">
+          <Dropdown.Item className="operator-menu" key="3" href="#action/3.3">
             Log out
           </Dropdown.Item>
         </Dropdown.Menu>

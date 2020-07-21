@@ -38,11 +38,6 @@ class SideNav extends Component {
         {
           key: 5,
           isDropdown: true,
-          // children: [
-          //     {
-
-          //     }
-          // ]
         },
       ],
     };
@@ -191,7 +186,7 @@ class CustomDropdownButton extends Component {
               >
                 <Button
                   className="buttons"
-                  href={category.url}
+                  href={`categories/${category.slug}`}
                   variant="secondary"
                 >
                   <div className="dropdown-items">{category.name}</div>
@@ -205,13 +200,13 @@ class CustomDropdownButton extends Component {
 
                 <Dropdown.Menu>
                   {games
-                    .filter((game) => game.category === category.name)
+                    .filter((game) => game.category.name === category.name)
                     .map((filteredGame, key) => {
                       return (
                         <Dropdown.Item
                           className="item-hover"
                           key={key}
-                          href={filteredGame.url}
+                          href={`/games/${filteredGame.slug}`}
                         >
                           <div className="dropdown-items d-buttons">
                             {filteredGame.name}
