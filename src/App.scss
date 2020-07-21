@@ -33,7 +33,11 @@ code {
   .sticky-navbar {
     position: sticky;
     top: 0;
-    z-index: 100;
+    z-index: 10;
     opacity: 90%;
+  }
+
+  body {
+    font-size: 75%;
   }
 }

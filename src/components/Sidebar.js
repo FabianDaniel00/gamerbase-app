@@ -186,7 +186,7 @@ class CustomDropdownButton extends Component {
               >
                 <Button
                   className="buttons"
-                  href={`categories/${category.slug}`}
+                  href={`/categories/${category.slug}`}
                   variant="secondary"
                 >
                   <div className="dropdown-items">{category.name}</div>

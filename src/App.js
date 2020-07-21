@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useLayoutEffect } from "react";
 import "./App.scss";
+import Headroom from "react-headroom";
 import NavigationBar from "./components/NavigationBar";
 import Sidebar from "./components/Sidebar";
 import ClassCarousel from "./components/Carousel";
@@ -67,12 +68,34 @@ const App = () => {
       });
   }, []);
 
+  const useWindowSize = () => {
+    const [size, setSize] = useState([0]);
+    useLayoutEffect(() => {
+      function updateSize() {
+        setSize([window.innerWidth]);
+      }
+      window.addEventListener("resize", updateSize);
+      updateSize();
+      return () => window.removeEventListener("resize", updateSize);
+    }, []);
+    return size;
+  };
+
   return (
     <ApolloProvider client={client}>
       <Router>
-        <div className="sticky-navbar">
-          <NavigationBar categories={categories} games={games} />
-        </div>
+        {useWindowSize() <= 500 && (
+          <Headroom>
+            <div className="sticky-navbar">
+              <NavigationBar categories={categories} games={games} />
+            </div>
+          </Headroom>
+        )}
+        {useWindowSize() > 500 && (
+          <div className="sticky-navbar">
+            <NavigationBar categories={categories} games={games} />
+          </div>
+        )}
         <div className="height">
           <Sidebar categories={categories} games={games} />
           <div className="content-wrapper">

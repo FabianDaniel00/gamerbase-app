@@ -43,7 +43,7 @@ const Styles = styled.div`
 
   .navdropdown-item {
     color: #222;
-    width: 100%;
+    width: auto;
     margin-left: 5px;
     &:hover {
       background-color: #4d4d4d;
@@ -70,9 +70,19 @@ const Styles = styled.div`
   }
 
   .d-item {
+    width: 100%;
     &:hover {
       background-color: #4d4d4d;
       color: white;
+    }
+  }
+
+  @media (max-width: 500px) {
+    .navdropdown-item {
+      font-size: 75%;
+    }
+    .d-item {
+      font-size: 75%;
     }
   }
 
@@ -105,7 +115,7 @@ class NavigationBar extends Component {
                     >
                       <Button
                         className="navdropdown-item"
-                        href={`categories/${category.slug}`}
+                        href={`/categories/${category.slug}`}
                         variant="secondary"
                       >
                         {category.name}
@@ -127,7 +137,7 @@ class NavigationBar extends Component {
                               <Dropdown.Item
                                 className="d-item"
                                 key={key}
-                                href={`games/${filteredGame.slug}`}
+                                href={`/games/${filteredGame.slug}`}
                               >
                                 {filteredGame.name}
                               </Dropdown.Item>
@@ -205,14 +215,14 @@ class CustomDropdownButton extends Component {
         </Dropdown.Toggle>
 
         <Dropdown.Menu as={CustomMenu}>
-          <Dropdown.Item className="operator-menu" key="1" href="#action/3.1">
+          <Dropdown.Item className="operator-menu" key="1" href="/action/3.1">
             My profile
           </Dropdown.Item>
-          <Dropdown.Item className="operator-menu" key="2" href="#action/3.2">
+          <Dropdown.Item className="operator-menu" key="2" href="/action/3.2">
             Settings
           </Dropdown.Item>
           <Dropdown.Divider />
-          <Dropdown.Item className="operator-menu" key="3" href="#action/3.3">
+          <Dropdown.Item className="operator-menu" key="3" href="/action/3.3">
             Log out
           </Dropdown.Item>
         </Dropdown.Menu>
