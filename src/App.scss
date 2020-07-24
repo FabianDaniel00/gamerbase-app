@@ -19,10 +19,21 @@ code {
 .content-wrapper {
   margin-left: 75px;
   position: relative;
+  height: 100%;
 }
 
 .height {
   position: relative;
+}
+
+@media (max-width: 991px) {
+  body {
+    font-size: 90%;
+  }
+
+  h1 {
+    font-size: 90%;
+  }
 }
 
 @media (max-width: 500px) {
@@ -38,6 +49,10 @@ code {
   }
 
   body {
-    font-size: 75%;
+    font-size: 80%;
+  }
+
+  h1 {
+    font-size: 80%;
   }
 }

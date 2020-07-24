@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect } from "react";
 import "./App.scss";
 import Headroom from "react-headroom";
 import NavigationBar from "./components/NavigationBar";
@@ -27,46 +27,42 @@ const App = () => {
   const [categories, setCategories] = useState([]);
   const [games, setGames] = useState([]);
 
-  useEffect(() => {
-    client
-      .query({
-        query: gql`
-          {
-            allCategories(limit: 30, page: 1) {
-              categories {
-                name
-                slug
-              }
+  client
+    .query({
+      query: gql`
+        {
+          allCategories(limit: 30, page: 1) {
+            categories {
+              name
+              slug
             }
           }
-        `,
-      })
-      .then(({ data }) => {
-        setCategories(data.allCategories.categories);
-      });
-  }, []);
+        }
+      `,
+    })
+    .then(({ data }) => {
+      setCategories(data.allCategories.categories);
+    });
 
-  useEffect(() => {
-    client
-      .query({
-        query: gql`
-          {
-            allGames(limit: 30, page: 1) {
-              games {
+  client
+    .query({
+      query: gql`
+        {
+          allGames(limit: 30, page: 1) {
+            games {
+              name
+              slug
+              category {
                 name
-                slug
-                category {
-                  name
-                }
               }
             }
           }
-        `,
-      })
-      .then(({ data }) => {
-        setGames(data.allGames.games);
-      });
-  }, []);
+        }
+      `,
+    })
+    .then(({ data }) => {
+      setGames(data.allGames.games);
+    });
 
   const useWindowSize = () => {
     const [size, setSize] = useState([0]);
@@ -102,8 +98,14 @@ const App = () => {
             <ClassCarousel />
             <Switch>
               <Route exact path="/" component={Home} />
-              <Route path="/login" component={Login} />
-              <Route path="/signup" component={Register} />
+              <Route
+                path="/login"
+                component={() => <Login client={client} />}
+              />
+              <Route
+                path="/signup"
+                component={() => <Register client={client} />}
+              />
               <Route path="/about" component={About} />
               <Route component={NoMatch} />
             </Switch>

@@ -1,9 +1,55 @@
 .about {
-  display: grid;
-  grid-gap: 10px;
-  margin-top: 1em;
-  margin-left: 3em;
-  margin-right: 3em;
-  grid-template-columns: repeat(12, 1fr);
-  grid-auto-rows: minmax(25px, auto);
+  background-color: #363636;
+  border-left: 5px solid #9fffcb;
+  border-right: 5px solid #9fffcb;
+  border-radius: 0 0 20px 20px;
+  display: block;
+  margin: 0 10%;
+  color: white;
+  padding: 10px 5% 10px 5%;
+}
+
+.header {
+  margin: 0 5%;
+  background-color: #5e5e5e;
+  padding-bottom: 25%;
+  width: 90%;
+  text-align: center;
+  position: absolute;
+  font-size: 50px;
+}
+
+.relative {
+  position: relative;
+}
+
+.top {
+  position: relative;
+  top: 110px;
+  margin: 0 10% 150px 10%;
+}
+
+.content {
+  position: relative;
+  margin: 0 10% 20px 10%;
+}
+
+@media (max-width: 991px) {
+  .header {
+    font-size: 35px;
+  }
+  .top {
+    top: 80px;
+    margin: 0 10% 130px 10%;
+  }
+}
+
+@media (max-width: 500px) {
+  .header {
+    font-size: 25px;
+  }
+  .top {
+    top: 60px;
+    margin: 0 10% 110px 10%;
+  }
 }

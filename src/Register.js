@@ -1,30 +1,112 @@
-import React from "react";
-import { Form, Col, Button, Container, Alert } from "react-bootstrap";
+import React, { useState } from "react";
+import { Form, Col, Button, Alert } from "react-bootstrap";
+import { gql } from "@apollo/client";
 import "./Form.scss";
 
-export const Register = (props) => (
-  <Form>
-    <Container className="form-wrapper">
+export const Register = (props) => {
+  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [show, setShow] = useState(false);
+  const [id, setId] = useState("");
+  const [registerErrors, setRegisterErrors] = useState("");
+
+  const { client } = props;
+
+  function handleSubmit() {
+    if (confirmPassword !== password) {
+      setShow(true);
+      setId("confirm-password");
+    } else {
+      client
+        .mutation({
+          mutation: gql`
+              {
+                // mutation
+              }
+            `,
+        })
+        .then((response) => {
+          console.log("response from register: ", response);
+        })
+        .catch((error) => {
+          console.log("register error: ", error);
+        });
+    }
+  }
+
+  return (
+    <Form
+      className="form-wrapper"
+      onSubmit={(event) => handleSubmit(event.preventDefault())}
+    >
       <Form.Group controlId="formHorizontalUsername">
         <Form.Label column>Username</Form.Label>
         <Col>
-          <Form.Control type="text" placeholder="Username" />
+          <Form.Control
+            onChange={(event) => setUsername(event.target.value)}
+            type="text"
+            placeholder="Username"
+            value={username}
+            required
+          />
         </Col>
       </Form.Group>
 
       <Form.Group controlId="formHorizontalEmail">
         <Form.Label column>Email</Form.Label>
         <Col>
-          <Form.Control type="email" placeholder="email@adress.com" />
+          <Form.Control
+            onChange={(event) => setEmail(event.target.value)}
+            type="email"
+            placeholder="email@adress.com"
+            value={email}
+            required
+          />
         </Col>
       </Form.Group>
 
       <Form.Group controlId="formHorizontalPassword">
         <Form.Label column>Password</Form.Label>
         <Col>
-          <Form.Control type="password" placeholder="Password" />
+          <Form.Control
+            onChange={(event) => setPassword(event.target.value)}
+            type="password"
+            placeholder="Password"
+            value={password}
+            required
+          />
         </Col>
       </Form.Group>
+
+      <Form.Group controlId="formHorizontalConfirmPassword">
+        <Form.Label column>Confirm password</Form.Label>
+        <Col>
+          <Form.Control
+            onChange={(event) => {
+              setShow(false);
+              setConfirmPassword(event.target.value);
+              setId("");
+            }}
+            type="password"
+            placeholder="Confirm password"
+            value={confirmPassword}
+            id={id}
+            required
+          />
+        </Col>
+      </Form.Group>
+
+      {show && (
+        <Form.Group>
+          <Col>
+            <Alert variant="danger">
+              <p>Password not match!</p>
+            </Alert>
+          </Col>
+        </Form.Group>
+      )}
 
       <Form.Group controlId="formHorizontalCheck">
         <Col>
@@ -45,13 +127,11 @@ export const Register = (props) => (
         </Col>
       </Form.Group>
 
-      <Form.Group>
-        <Col>
-          <Button type="submit" block>
-            Sign up
-          </Button>
-        </Col>
-      </Form.Group>
-    </Container>
-  </Form>
-);
+      <Col>
+        <Button type="submit" block>
+          Sign up
+        </Button>
+      </Col>
+    </Form>
+  );
+};

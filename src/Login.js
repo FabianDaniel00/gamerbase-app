@@ -1,21 +1,60 @@
-import React from "react";
-import { Form, Col, Button, Container, Alert } from "react-bootstrap";
+import React, { useState } from "react";
+import { Form, Col, Button, Alert } from "react-bootstrap";
+import { gql } from "@apollo/client";
 import "./Form.scss";
 
-export const Login = () => (
-  <Form>
-    <Container className="form-wrapper">
+export const Login = (props) => {
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [loginErrors, setLoginErrors] = useState("");
+
+  const { client } = props;
+
+  function handleSubmit() {
+    client
+      .mutation({
+        mutation: gql`
+            {
+              // mutation
+            }
+          `,
+      })
+      .then((response) => {
+        console.log("response from login: ", response);
+      })
+      .catch((error) => {
+        console.log("login error: ", error);
+      });
+  }
+
+  return (
+    <Form
+      className="form-wrapper"
+      onSubmit={(event) => handleSubmit(event.preventDefault())}
+    >
       <Form.Group controlId="formHorizontalUsername">
         <Form.Label column>Username</Form.Label>
         <Col>
-          <Form.Control type="text" placeholder="Username" />
+          <Form.Control
+            onChange={(event) => setUsername(event.target.value)}
+            type="text"
+            value={username}
+            placeholder="Username"
+            required
+          />
         </Col>
       </Form.Group>
 
       <Form.Group controlId="formHorizontalPassword">
         <Form.Label column>Password</Form.Label>
         <Col>
-          <Form.Control type="password" placeholder="Password" />
+          <Form.Control
+            onChange={(event) => setPassword(event.target.value)}
+            type="password"
+            value={password}
+            placeholder="Password"
+            required
+          />
         </Col>
       </Form.Group>
 
@@ -38,13 +77,11 @@ export const Login = () => (
         </Col>
       </Form.Group>
 
-      <Form.Group>
-        <Col>
-          <Button type="submit" block>
-            Login
-          </Button>
-        </Col>
-      </Form.Group>
-    </Container>
-  </Form>
-);
+      <Col>
+        <Button type="submit" block>
+          Login
+        </Button>
+      </Col>
+    </Form>
+  );
+};
