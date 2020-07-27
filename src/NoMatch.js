@@ -3,6 +3,6 @@ import "./NoMatch.scss";
 
 export const NoMatch = () => (
   <div className="nomatch">
-    <h2>No Match</h2>
+    <h2>404: not found</h2>
   </div>
 );

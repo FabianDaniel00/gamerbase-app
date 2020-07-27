@@ -32,6 +32,7 @@
 .content {
   position: relative;
   margin: 0 10% 20px 10%;
+  text-align: justify;
 }
 
 @media (max-width: 991px) {
@@ -42,6 +43,9 @@
     top: 80px;
     margin: 0 10% 130px 10%;
   }
+  .about {
+    margin: 0 5%;
+  }
 }
 
 @media (max-width: 500px) {
@@ -51,5 +55,8 @@
   .top {
     top: 60px;
     margin: 0 10% 110px 10%;
+  }
+  .about {
+    margin: 0 1%;
   }
 }

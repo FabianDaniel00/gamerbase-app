@@ -6,6 +6,7 @@ import Sidebar from "./components/Sidebar";
 import ClassCarousel from "./components/Carousel";
 import Footer from "./components/Footer";
 import { Login } from "./Login";
+import { DevInterface } from "./DevInterface";
 import { Register } from "./Register";
 import { Home } from "./Home";
 import { About } from "./About";
@@ -103,9 +104,10 @@ const App = () => {
                 component={() => <Login client={client} />}
               />
               <Route
-                path="/signup"
-                component={() => <Register client={client} />}
+                path="/dev-interface"
+                component={() => <DevInterface client={client} />}
               />
+              <Route path="/signup" component={Register} />
               <Route path="/about" component={About} />
               <Route component={NoMatch} />
             </Switch>

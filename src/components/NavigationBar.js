@@ -26,7 +26,7 @@ const Styles = styled.div`
   }
 
   .navbar-brand {
-    font-size: 1.4em;
+    font-size: 1.6em;
     color: #9fffcb;
     &:hover {
       color: white;
@@ -35,7 +35,7 @@ const Styles = styled.div`
 
   .form-center {
     position: absolute;
-    left: 270px;
+    left: 280px;
     right: 25%;
     max-width: 430px;
     z-index: 0;

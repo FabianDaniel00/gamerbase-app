@@ -120,18 +120,18 @@ export const Register = (props) => {
         </Col>
       </Form.Group>
 
-      <Form.Group>
-        <Col>
-          If you already have an account,
-          <Alert.Link href="/login"> click here</Alert.Link> to login.
-        </Col>
-      </Form.Group>
-
       <Col>
         <Button type="submit" block>
           Sign up
         </Button>
       </Col>
+
+      <Form.Group className="if-you">
+        <Col>
+          If you already have an account,
+          <Alert.Link href="/login"> click here</Alert.Link> to login.
+        </Col>
+      </Form.Group>
     </Form>
   );
 };
