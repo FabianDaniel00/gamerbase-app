@@ -7,6 +7,16 @@
   border-radius: 10px;
 }
 
+.dev-form {
+  width: 90%;
+  max-width: 400px;
+  margin: 5%;
+  background-color: #dbdbdb;
+  padding: 20px;
+  border-radius: 10px;
+  float: left;
+}
+
 #confirm-password {
   border: 2px solid red;
   border-radius: 4px;
@@ -26,4 +36,18 @@
   font-size: 25px;
   font-weight: bold;
   position: relative;
+}
+
+.event-dropdown {
+  margin: 0 auto;
+  width: 100%;
+}
+
+.event-button {
+  width: 70%;
+}
+
+.dropdown-item:hover {
+  background-color: #006308;
+  color: white;
 }

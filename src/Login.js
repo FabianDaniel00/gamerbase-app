@@ -4,15 +4,15 @@ import { gql } from "@apollo/client";
 import "./Form.scss";
 
 export const Login = (props) => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginErrors, setLoginErrors] = useState("");
+  const [username, setUsername] = useState(String);
+  const [password, setPassword] = useState(String);
+  const [loginErrors, setLoginErrors] = useState(String);
 
   const { client } = props;
 
   function handleSubmit() {
     client
-      .mutation({
+      .utation({
         mutation: gql`
             {
               // mutation

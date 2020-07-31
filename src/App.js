@@ -1,12 +1,12 @@
 import React, { useState, useLayoutEffect } from "react";
 import "./App.scss";
+import DevInterface from "./dev_interface/DevInterface";
 import Headroom from "react-headroom";
 import NavigationBar from "./components/NavigationBar";
 import Sidebar from "./components/Sidebar";
 import ClassCarousel from "./components/Carousel";
 import Footer from "./components/Footer";
 import { Login } from "./Login";
-import { DevInterface } from "./DevInterface";
 import { Register } from "./Register";
 import { Home } from "./Home";
 import { About } from "./About";
@@ -41,8 +41,10 @@ const App = () => {
         }
       `,
     })
-    .then(({ data }) => {
-      setCategories(data.allCategories.categories);
+    .then(({ loading, error, data }) => {
+      if (loading) return <a>Loading categories...</a>;
+      if (error) return <a>Error! {error.message}</a>;
+      if (data) setCategories(data.allCategories.categories);
     });
 
   client
@@ -61,8 +63,10 @@ const App = () => {
         }
       `,
     })
-    .then(({ data }) => {
-      setGames(data.allGames.games);
+    .then(({ loading, error, data }) => {
+      if (loading) return <a>Loading games...</a>;
+      if (error) return <a>Error! {error.message}</a>;
+      if (data) setGames(data.allGames.games);
     });
 
   const useWindowSize = () => {
@@ -99,16 +103,10 @@ const App = () => {
             <ClassCarousel />
             <Switch>
               <Route exact path="/" component={Home} />
-              <Route
-                path="/login"
-                component={() => <Login client={client} />}
-              />
-              <Route
-                path="/dev-interface"
-                component={() => <DevInterface client={client} />}
-              />
+              <Route path="/login" component={Login} />
               <Route path="/signup" component={Register} />
               <Route path="/about" component={About} />
+              <Route path="/dev-interface" component={DevInterface} />
               <Route component={NoMatch} />
             </Switch>
           </div>

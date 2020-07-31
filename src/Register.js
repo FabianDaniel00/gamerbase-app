@@ -4,13 +4,13 @@ import { gql } from "@apollo/client";
 import "./Form.scss";
 
 export const Register = (props) => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [username, setUsername] = useState(String);
+  const [email, setEmail] = useState(String);
+  const [password, setPassword] = useState(String);
+  const [confirmPassword, setConfirmPassword] = useState(String);
   const [show, setShow] = useState(false);
-  const [id, setId] = useState("");
-  const [registerErrors, setRegisterErrors] = useState("");
+  const [id, setId] = useState(String);
+  const [registerErrors, setRegisterErrors] = useState(String);
 
   const { client } = props;
 
@@ -101,9 +101,7 @@ export const Register = (props) => {
       {show && (
         <Form.Group>
           <Col>
-            <Alert variant="danger">
-              <p>Password not match!</p>
-            </Alert>
+            <Alert variant="danger">Passwords not match!</Alert>
           </Col>
         </Form.Group>
       )}
