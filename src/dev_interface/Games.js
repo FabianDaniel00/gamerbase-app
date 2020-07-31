@@ -12,36 +12,42 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import "../Form.scss";
 import "./Table.scss";
 
-const ADD_CATEGORY = gql`
-  mutation($name: String!) {
-    createCategory(category: { name: $name }) {
+const ADD_GAME = gql`
+  mutation($name: String!, $category: !String) {
+    createGame(game: { name: $name, category: $category}) {
       name
+      category {
+          id
+      }
     }
   }
 `;
 
-const UPDATE_CATEGORY = gql`
+const UPDATE_GAME = gql`
   mutation($id: ID!, $name: String!) {
-    updateCategory(id: $id, category: { name: $name }) {
+    updateGame(id: $id, game: { name: $name }) {
       id
       name
     }
   }
 `;
 
-const DELETE_CATEGORY = gql`
+const DELETE_GAME = gql`
   mutation($id: ID!) {
-    deleteCategory(id: $id)
+    deleteGame(id: $id)
   }
 `;
 
-const CATEGORIES = gql`
+const GAMES = gql`
   {
-    allCategories(limit: 100, page: 1) {
-      categories {
+    allGames(limit: 100, page: 1) {
+      games {
         id
         name
         slug
+        category {
+            name
+        }
       }
     }
   }
@@ -49,23 +55,24 @@ const CATEGORIES = gql`
 
 const ContentTable = (props) => {
   const {
-    categoriesData,
-    categoriesLoading,
-    categoriesError,
-    deleteCategory,
-    successCategoryDelete,
-    errorCategoryDelete,
-    setShowCategoryResponse,
+    data,
+    loading,
+    error,
+    deleteGame,
+    successDelete,
+    errorDelete,
+    setShowResponse,
   } = props;
 
-  if (categoriesLoading) {
+  if (loading) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Category Name</th>
-            <th>Category Slug</th>
+            <th>Game Name</th>
+            <th>Game Slug</th>
+            <th>Game Category</th>
             <th>Remove</th>
           </tr>
         </thead>
@@ -76,31 +83,32 @@ const ContentTable = (props) => {
     );
   }
 
-  if (categoriesError) {
+  if (error) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Category Name</th>
-            <th>Category Slug</th>
+            <th>Game Name</th>
+            <th>Game Slug</th>
+            <th>Game Category</th>
             <th>Remove</th>
           </tr>
         </thead>
         <tbody>
-          <tr>Error! {categoriesError.message}</tr>
+          <tr>Error! {error.message}</tr>
         </tbody>
       </Table>
     );
   }
 
   function remove(id) {
-    deleteCategory({
+    deleteGame({
       variables: { id: id },
-      refetchQueries: [{ query: CATEGORIES }],
+      refetchQueries: [{ query: GAMES }],
     })
-      .then(() => successCategoryDelete(id))
-      .catch(() => errorCategoryDelete(id));
+      .then(() => successDelete(id))
+      .catch(() => errorDelete(id));
   }
 
   return (
@@ -115,25 +123,27 @@ const ContentTable = (props) => {
       <thead>
         <tr>
           <th>ID</th>
-          <th>Category Name</th>
-          <th>Category Slug</th>
+          <th>Game Name</th>
+          <th>Game Slug</th>
+          <th>Game Category</th>
           <th>Remove</th>
         </tr>
       </thead>
       <tbody>
-        {categoriesData.map((category, key) => {
+        {data.map((game, key) => {
           return (
             <tr key={key}>
-              <td className="column">{category.id}</td>
-              <td className="column">{category.name}</td>
-              <td className="column">{category.slug}</td>
+              <td className="column">{game.id}</td>
+              <td className="column">{game.name}</td>
+              <td className="column">{game.slug}</td>
+              <td className="column">{game.category.name}</td>
               <td className="column">
                 <Button
                   variant="outline-primary"
                   size="sm"
                   onClick={() => {
-                    setShowCategoryResponse(false);
-                    remove(category.id);
+                    setShowResponse(false);
+                    remove(game.id);
                   }}
                 >
                   Remove
@@ -147,93 +157,93 @@ const ContentTable = (props) => {
   );
 };
 
-export const Categories = () => {
-  const [createCategory, { loading: categoryAddLoading }] = useMutation(
-    ADD_CATEGORY
+export const Games = () => {
+  const [createGame, { loading: addLoading }] = useMutation(
+    ADD_GAME
   );
-  const [updateCategory, { loading: categoryUpdateLoading }] = useMutation(
-    UPDATE_CATEGORY
+  const [updateGame, { loading: updateLoading }] = useMutation(
+    UPDATE_GAME
   );
-  const [deleteCategory, { loading: categoryDeleteLoading }] = useMutation(
-    DELETE_CATEGORY
+  const [deleteGame, { loading: deleteLoading }] = useMutation(
+    DELETE_GAME
   );
 
-  const [categoryNameDisabled, setCategoryNameDisabled] = useState(false);
-  const [categoryIDDisabled, setCategoryIDDisabled] = useState(true);
-  const [categorySubmitEvent, setCategorySubmitEvent] = useState("Add");
-  const [categoryVariant, setCategoryVariant] = useState(String);
-  const [categoryReponse, setCategoryResponse] = useState(String);
-  const [showCategoryReponse, setShowCategoryResponse] = useState(false);
-  const [categoryName, setCategoryName] = useState(String);
-  const [categoryID, setCategoryID] = useState(String);
-  const [categoryIDPlaceholder, setCategoryIDPlaceholder] = useState(String);
-  const [categories, setCategories] = useState([]);
-  const [categoryNamePlaceholder, setCategoryNamePlaceholder] = useState(
-    "category name"
+  const [nameDisabled, setNameDisabled] = useState(false);
+  const [IDDisabled, setIDDisabled] = useState(true);
+  const [submitEvent, setSubmitEvent] = useState("Add");
+  const [variant, setVariant] = useState(String);
+  const [reponse, setResponse] = useState(String);
+  const [showReponse, setShowResponse] = useState(false);
+  const [name, setName] = useState(String);
+  const [ID, setID] = useState(String);
+  const [IDPlaceholder, setIDPlaceholder] = useState(String);
+  const [games, setGames] = useState([]);
+  const [namePlaceholder, setNamePlaceholder] = useState(
+    "game name"
   );
 
   const {
-    loading: categoriesLoading,
-    error: categoriesError,
-    data: categoriesData,
-  } = useQuery(CATEGORIES);
+    loading: gamesLoading,
+    error: gamesError,
+    data: gamesData,
+  } = useQuery(GAMES);
 
   useEffect(() => {
-    if (categoriesData) setCategories(categoriesData.allCategories.categories);
+    if (gamesData) setGames(gamesData.allGames.games);
   });
 
-  function successCategoryAdd() {
-    setCategoryResponse(`Successfully added '${categoryName}' category!`);
-    setCategoryVariant("success");
-    setCategoryName("");
-    setCategoryID("");
-    setShowCategoryResponse(true);
+  function successAdd() {
+    setResponse(`Successfully added '${name}' game!`);
+    setVariant("success");
+    setName("");
+    setID("");
+    setShowResponse(true);
   }
 
-  function errorCategoryAdd() {
-    setCategoryResponse(`Category '${categoryName}' was not added!`);
-    setCategoryVariant("danger");
-    setShowCategoryResponse(true);
+  function errorAdd() {
+    setResponse(`Game '${name}' was not added!`);
+    setVariant("danger");
+    setShowResponse(true);
   }
 
-  function successCategoryUpdate() {
-    setCategoryResponse(
-      `Successfully updated ID: '${categoryID}' category to '${categoryName}'!`
+  function successUpdate() {
+    setResponse(
+      `Successfully updated ID: '${ID}' category to '${name}'!`
     );
-    setCategoryVariant("success");
-    setCategoryName("");
-    setCategoryID("");
-    setShowCategoryResponse(true);
+    setVariant("success");
+    setName("");
+    setID("");
+    setShowResponse(true);
   }
 
-  function errorCategoryUpdate() {
-    setCategoryResponse(`Category ID: '${categoryID}' was not updated!`);
-    setCategoryVariant("danger");
-    setShowCategoryResponse(true);
+  function errorUpdate() {
+    setResponse(`Game ID: '${ID}' was not updated!`);
+    setVariant("danger");
+    setShowResponse(true);
   }
 
-  function successCategoryDelete(id) {
+  function successDelete(id) {
     if (id) {
-      setCategoryResponse(`Category ID: '${id}' was successfully deleted!`);
+      setResponse(`Game ID: '${id}' was successfully deleted!`);
     } else {
-      setCategoryResponse(
-        `Category ID: '${categoryID}' was successfully deleted!`
+      setResponse(
+        `Game ID: '${ID}' was successfully deleted!`
       );
     }
-    setCategoryVariant("success");
-    setCategoryName("");
-    setCategoryID("");
-    setShowCategoryResponse(true);
+    setVariant("success");
+    setName("");
+    setID("");
+    setShowResponse(true);
   }
 
-  function errorCategoryDelete(id) {
+  function errorDelete(id) {
     if (id) {
-      setCategoryResponse(`Category ID: '${id}' was not deleted!`);
+      setResponse(`Game ID: '${id}' was not deleted!`);
     } else {
-      setCategoryResponse(`Category ID: '${categoryID}' was not deleted!`);
+      setResponse(`Game ID: '${ID}' was not deleted!`);
     }
-    setCategoryVariant("danger");
-    setShowCategoryResponse(true);
+    setVariant("danger");
+    setShowResponse(true);
   }
 
   function handleCategorySubmit() {
