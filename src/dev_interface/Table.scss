@@ -1,5 +1,5 @@
 .content-table {
-  width: 30%;
+  width: 50%;
   margin: 5%;
   overflow: hidden;
   float: left;
@@ -11,5 +11,10 @@
 }
 
 .column {
-  vertical-align: center;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.remove {
+  text-align: center;
 }

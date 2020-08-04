@@ -56,6 +56,7 @@ const ContentTable = (props) => {
     successCategoryDelete,
     errorCategoryDelete,
     setShowCategoryResponse,
+    tableClick,
   } = props;
 
   if (categoriesLoading) {
@@ -66,11 +67,11 @@ const ContentTable = (props) => {
             <th>ID</th>
             <th>Category Name</th>
             <th>Category Slug</th>
-            <th>Remove</th>
+            <th className="text-center">Remove</th>
           </tr>
         </thead>
         <tbody>
-          <tr>Loading...</tr>
+          <tr className="text-center">Loading...</tr>
         </tbody>
       </Table>
     );
@@ -84,11 +85,11 @@ const ContentTable = (props) => {
             <th>ID</th>
             <th>Category Name</th>
             <th>Category Slug</th>
-            <th>Remove</th>
+            <th className="text-center">Remove</th>
           </tr>
         </thead>
         <tbody>
-          <tr>Error! {categoriesError.message}</tr>
+          <tr className="text-center">Error! {categoriesError.message}</tr>
         </tbody>
       </Table>
     );
@@ -104,30 +105,23 @@ const ContentTable = (props) => {
   }
 
   return (
-    <Table
-      className="content-table"
-      striped
-      bordered
-      hover
-      reaponsive
-      size="sm"
-    >
+    <Table className="content-table" striped bordered hover size="sm">
       <thead>
         <tr>
           <th>ID</th>
           <th>Category Name</th>
           <th>Category Slug</th>
-          <th>Remove</th>
+          <th className="text-center">Remove</th>
         </tr>
       </thead>
       <tbody>
         {categoriesData.map((category, key) => {
           return (
-            <tr key={key}>
+            <tr onClick={() => tableClick(category.id)} key={key}>
               <td className="column">{category.id}</td>
               <td className="column">{category.name}</td>
               <td className="column">{category.slug}</td>
-              <td className="column">
+              <td className="text-center">
                 <Button
                   variant="outline-primary"
                   size="sm"
@@ -148,15 +142,18 @@ const ContentTable = (props) => {
 };
 
 export const Categories = () => {
-  const [createCategory, { loading: categoryAddLoading }] = useMutation(
-    ADD_CATEGORY
-  );
-  const [updateCategory, { loading: categoryUpdateLoading }] = useMutation(
-    UPDATE_CATEGORY
-  );
-  const [deleteCategory, { loading: categoryDeleteLoading }] = useMutation(
-    DELETE_CATEGORY
-  );
+  const [
+    createCategory,
+    { loading: categoryAddLoading, error: addCategoryError },
+  ] = useMutation(ADD_CATEGORY);
+  const [
+    updateCategory,
+    { loading: categoryUpdateLoading, error: updateCategoryError },
+  ] = useMutation(UPDATE_CATEGORY);
+  const [
+    deleteCategory,
+    { loading: categoryDeleteLoading, error: deleteCategoryError },
+  ] = useMutation(DELETE_CATEGORY);
 
   const [categoryNameDisabled, setCategoryNameDisabled] = useState(false);
   const [categoryIDDisabled, setCategoryIDDisabled] = useState(true);
@@ -181,6 +178,12 @@ export const Categories = () => {
   useEffect(() => {
     if (categoriesData) setCategories(categoriesData.allCategories.categories);
   });
+
+  function tableClick(id) {
+    if (categorySubmitEvent === "Update" || categorySubmitEvent === "Delete") {
+      setCategoryID(id);
+    }
+  }
 
   function successCategoryAdd() {
     setCategoryResponse(`Successfully added '${categoryName}' category!`);
@@ -269,6 +272,13 @@ export const Categories = () => {
         setShowCategoryResponse(true);
         setCategoryResponse("Error!!!");
         setCategoryVariant("danger");
+    }
+    if (addCategoryError) {
+      errorCategoryAdd();
+    } else if (updateCategoryError) {
+      errorCategoryUpdate();
+    } else if (deleteCategoryError) {
+      errorCategoryDelete();
     }
   }
 
@@ -405,6 +415,7 @@ export const Categories = () => {
         successCategoryDelete={successCategoryDelete}
         errorCategoryDelete={errorCategoryDelete}
         setShowCategoryResponse={setShowCategoryResponse}
+        tableClick={tableClick}
       />
     </div>
   );

@@ -11,13 +11,14 @@ import {
 import { gql, useMutation, useQuery } from "@apollo/client";
 import "../Form.scss";
 import "./Table.scss";
+import { UpdateCategoriesList } from "./Categories";
 
 const ADD_GAME = gql`
-  mutation($name: String!, $category: !String) {
-    createGame(game: { name: $name, category: $category}) {
+  mutation($name: String!, $categoryID: Int!) {
+    createGame(game: { name: $name, category: $categoryID }) {
       name
       category {
-          id
+        name
       }
     }
   }
@@ -46,8 +47,19 @@ const GAMES = gql`
         name
         slug
         category {
-            name
+          name
         }
+      }
+    }
+  }
+`;
+
+const CATEGORIES = gql`
+  {
+    allCategories(limit: 100, page: 1) {
+      categories {
+        name
+        id
       }
     }
   }
@@ -55,16 +67,17 @@ const GAMES = gql`
 
 const ContentTable = (props) => {
   const {
-    data,
-    loading,
-    error,
+    gamesData,
+    gamesLoading,
+    gamesError,
     deleteGame,
     successDelete,
     errorDelete,
     setShowResponse,
+    tableClick,
   } = props;
 
-  if (loading) {
+  if (gamesLoading) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
@@ -73,17 +86,17 @@ const ContentTable = (props) => {
             <th>Game Name</th>
             <th>Game Slug</th>
             <th>Game Category</th>
-            <th>Remove</th>
+            <th className="text-center">Remove</th>
           </tr>
         </thead>
         <tbody>
-          <tr>Loading...</tr>
+          <tr className="text-center">Loading...</tr>
         </tbody>
       </Table>
     );
   }
 
-  if (error) {
+  if (gamesError) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
@@ -92,11 +105,11 @@ const ContentTable = (props) => {
             <th>Game Name</th>
             <th>Game Slug</th>
             <th>Game Category</th>
-            <th>Remove</th>
+            <th className="text-center">Remove</th>
           </tr>
         </thead>
         <tbody>
-          <tr>Error! {error.message}</tr>
+          <tr className="text-center">Error! {gamesError.message}</tr>
         </tbody>
       </Table>
     );
@@ -112,32 +125,25 @@ const ContentTable = (props) => {
   }
 
   return (
-    <Table
-      className="content-table"
-      striped
-      bordered
-      hover
-      reaponsive
-      size="sm"
-    >
+    <Table className="content-table" striped bordered hover size="sm">
       <thead>
         <tr>
           <th>ID</th>
           <th>Game Name</th>
           <th>Game Slug</th>
           <th>Game Category</th>
-          <th>Remove</th>
+          <th className="text-center">Remove</th>
         </tr>
       </thead>
       <tbody>
-        {data.map((game, key) => {
+        {gamesData.map((game, key) => {
           return (
-            <tr key={key}>
+            <tr onClick={() => tableClick(game.id)} key={key}>
               <td className="column">{game.id}</td>
               <td className="column">{game.name}</td>
               <td className="column">{game.slug}</td>
               <td className="column">{game.category.name}</td>
-              <td className="column">
+              <td className="text-center">
                 <Button
                   variant="outline-primary"
                   size="sm"
@@ -158,29 +164,32 @@ const ContentTable = (props) => {
 };
 
 export const Games = () => {
-  const [createGame, { loading: addLoading }] = useMutation(
+  const [createGame, { loading: addLoading, error: addError }] = useMutation(
     ADD_GAME
   );
-  const [updateGame, { loading: updateLoading }] = useMutation(
-    UPDATE_GAME
-  );
-  const [deleteGame, { loading: deleteLoading }] = useMutation(
-    DELETE_GAME
-  );
+  const [
+    updateGame,
+    { loading: updateLoading, error: updateError },
+  ] = useMutation(UPDATE_GAME);
+  const [
+    deleteGame,
+    { loading: deleteLoading, error: deleteError },
+  ] = useMutation(DELETE_GAME);
 
   const [nameDisabled, setNameDisabled] = useState(false);
+  const [categoryDisabled, setCategoryDisabled] = useState(false);
   const [IDDisabled, setIDDisabled] = useState(true);
   const [submitEvent, setSubmitEvent] = useState("Add");
   const [variant, setVariant] = useState(String);
-  const [reponse, setResponse] = useState(String);
-  const [showReponse, setShowResponse] = useState(false);
+  const [response, setResponse] = useState(String);
+  const [showResponse, setShowResponse] = useState(false);
   const [name, setName] = useState(String);
+  const [categoryID, setCategoryID] = useState(String);
   const [ID, setID] = useState(String);
   const [IDPlaceholder, setIDPlaceholder] = useState(String);
   const [games, setGames] = useState([]);
-  const [namePlaceholder, setNamePlaceholder] = useState(
-    "game name"
-  );
+  const [categories, setCategories] = useState([]);
+  const [namePlaceholder, setNamePlaceholder] = useState("game name");
 
   const {
     loading: gamesLoading,
@@ -188,14 +197,28 @@ export const Games = () => {
     data: gamesData,
   } = useQuery(GAMES);
 
+  const {
+    loading: categoriesLoading,
+    error: categoriesError,
+    data: categoriesData,
+  } = useQuery(CATEGORIES);
+
   useEffect(() => {
     if (gamesData) setGames(gamesData.allGames.games);
+    if (categoriesData) setCategories(categoriesData.allCategories.categories);
   });
+
+  function tableClick(id) {
+    if (submitEvent === "Update" || submitEvent === "Delete") {
+      setID(id);
+    }
+  }
 
   function successAdd() {
     setResponse(`Successfully added '${name}' game!`);
     setVariant("success");
     setName("");
+    setCategoryID("");
     setID("");
     setShowResponse(true);
   }
@@ -207,11 +230,10 @@ export const Games = () => {
   }
 
   function successUpdate() {
-    setResponse(
-      `Successfully updated ID: '${ID}' category to '${name}'!`
-    );
+    setResponse(`Successfully updated ID: '${ID}' game to '${name}'!`);
     setVariant("success");
     setName("");
+    setCategoryID("");
     setID("");
     setShowResponse(true);
   }
@@ -226,12 +248,11 @@ export const Games = () => {
     if (id) {
       setResponse(`Game ID: '${id}' was successfully deleted!`);
     } else {
-      setResponse(
-        `Game ID: '${ID}' was successfully deleted!`
-      );
+      setResponse(`Game ID: '${ID}' was successfully deleted!`);
     }
     setVariant("success");
     setName("");
+    setCategoryID("");
     setID("");
     setShowResponse(true);
   }
@@ -246,39 +267,46 @@ export const Games = () => {
     setShowResponse(true);
   }
 
-  function handleCategorySubmit() {
-    switch (categorySubmitEvent) {
+  function handleSubmit() {
+    switch (submitEvent) {
       case "Add":
-        createCategory({
-          variables: { name: categoryName },
-          refetchQueries: [{ query: CATEGORIES }],
+        createGame({
+          variables: { name: name, categoryID: categoryID },
+          refetchQueries: [{ query: GAMES }],
         })
-          .then(() => successCategoryAdd())
-          .catch(() => errorCategoryAdd());
+          .then(() => successAdd())
+          .catch(() => errorAdd());
         break;
 
       case "Update":
-        updateCategory({
-          variables: { id: categoryID, name: categoryName },
-          refetchQueries: [{ query: CATEGORIES }],
+        updateGame({
+          variables: { id: ID, name: name },
+          refetchQueries: [{ query: GAMES }],
         })
-          .then(() => successCategoryUpdate())
-          .catch(() => errorCategoryUpdate());
+          .then(() => successUpdate())
+          .catch(() => errorUpdate());
         break;
 
       case "Delete":
-        deleteCategory({
-          variables: { id: categoryID },
-          refetchQueries: [{ query: CATEGORIES }],
+        deleteGame({
+          variables: { id: ID },
+          refetchQueries: [{ query: GAMES }],
         })
-          .then(() => successCategoryDelete())
-          .catch(() => errorCategoryDelete());
+          .then(() => successDelete())
+          .catch(() => errorDelete());
         break;
 
       default:
-        setShowCategoryResponse(true);
-        setCategoryResponse("Error!!!");
-        setCategoryVariant("danger");
+        setShowResponse(true);
+        setResponse("Error!!!");
+        setVariant("danger");
+    }
+    if (addError) {
+      errorAdd();
+    } else if (updateError) {
+      errorUpdate();
+    } else if (deleteError) {
+      errorDelete();
     }
   }
 
@@ -286,42 +314,71 @@ export const Games = () => {
     <div className="dev">
       <Form
         className="dev-form"
-        onSubmit={(event) => handleCategorySubmit(event.preventDefault())}
+        onSubmit={(event) => handleSubmit(event.preventDefault())}
       >
         <div className="title-div">
-          <Form.Label className="title">Category</Form.Label>
+          <Form.Label className="title">Game</Form.Label>
         </div>
 
-        <Form.Group controlId="formHorizontalCategoryName">
-          <Form.Label column>Category name</Form.Label>
+        <Form.Group controlId="formHorizontalName">
+          <Form.Label column>Game name</Form.Label>
           <Col>
             <Form.Control
               type="text"
-              placeholder={categoryNamePlaceholder}
-              value={categoryName}
+              placeholder={namePlaceholder}
+              value={name}
               onChange={(event) => {
-                setShowCategoryResponse(false);
-                setCategoryName(event.target.value);
+                setShowResponse(false);
+                setName(event.target.value);
               }}
               required
-              disabled={categoryNameDisabled}
+              disabled={nameDisabled}
             />
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalCategoryID">
-          <Form.Label column>Category ID</Form.Label>
+        <Form.Group controlId="formHorizontalCategory">
+          <Form.Label column>Game category</Form.Label>
+          <Col>
+            <Form.Control
+              as="select"
+              onChange={(event) => {
+                setShowResponse(false);
+                setCategoryID(event.target.value);
+              }}
+              value={categoryID}
+              required
+              disabled={categoryDisabled}
+            >
+              {categoriesLoading && <option>Loading...</option>}
+              {categoriesError && (
+                <option>Error! {categoriesError.message}</option>
+              )}
+              <option>Choose one category...</option>
+              {categories.map((category, key) => {
+                return (
+                  <option key={key} value={category.id}>
+                    {category.name}
+                  </option>
+                );
+              })}
+            </Form.Control>
+          </Col>
+        </Form.Group>
+
+        <Form.Group controlId="formHorizontalID">
+          <Form.Label column>Game ID</Form.Label>
           <Col>
             <Form.Control
               type="number"
-              placeholder={categoryIDPlaceholder}
-              value={categoryID}
+              placeholder={IDPlaceholder}
+              value={ID}
               onChange={(event) => {
-                setShowCategoryResponse(false);
-                setCategoryID(event.target.value);
+                setShowResponse(false);
+                setID(event.target.value);
               }}
               required
-              disabled={categoryIDDisabled}
+              disabled={IDDisabled}
             />
           </Col>
         </Form.Group>
@@ -330,7 +387,7 @@ export const Games = () => {
           <Col>
             <Dropdown className="event-dropdown" drop="right" as={ButtonGroup}>
               <Button variant="primary" className="event-button" type="submit">
-                {categorySubmitEvent} category
+                {submitEvent} game
               </Button>
 
               <Dropdown.Toggle
@@ -342,13 +399,14 @@ export const Games = () => {
               <Dropdown.Menu>
                 <Dropdown.Item
                   onClick={() => {
-                    setCategorySubmitEvent("Add");
-                    setCategoryNameDisabled(false);
-                    setCategoryIDDisabled(true);
-                    setCategoryNamePlaceholder("category name");
-                    setCategoryIDPlaceholder("");
-                    setCategoryID("");
-                    setShowCategoryResponse(false);
+                    setSubmitEvent("Add");
+                    setNameDisabled(false);
+                    setCategoryDisabled(false);
+                    setIDDisabled(true);
+                    setNamePlaceholder("game name");
+                    setIDPlaceholder("");
+                    setID("");
+                    setShowResponse(false);
                   }}
                   className="dropdown-item"
                 >
@@ -357,12 +415,14 @@ export const Games = () => {
 
                 <Dropdown.Item
                   onClick={() => {
-                    setCategorySubmitEvent("Update");
-                    setCategoryNameDisabled(false);
-                    setCategoryIDDisabled(false);
-                    setCategoryNamePlaceholder("category name");
-                    setCategoryIDPlaceholder("category id");
-                    setShowCategoryResponse(false);
+                    setSubmitEvent("Update");
+                    setNameDisabled(false);
+                    setCategoryDisabled(true);
+                    setIDDisabled(false);
+                    setNamePlaceholder("game name");
+                    setIDPlaceholder("game id");
+                    setCategoryID("0");
+                    setShowResponse(false);
                   }}
                   className="dropdown-item"
                 >
@@ -371,13 +431,15 @@ export const Games = () => {
 
                 <Dropdown.Item
                   onClick={() => {
-                    setCategorySubmitEvent("Delete");
-                    setCategoryNameDisabled(true);
-                    setCategoryIDDisabled(false);
-                    setCategoryNamePlaceholder("");
-                    setCategoryName("");
-                    setCategoryIDPlaceholder("category id");
-                    setShowCategoryResponse(false);
+                    setSubmitEvent("Delete");
+                    setNameDisabled(true);
+                    setCategoryDisabled(true);
+                    setIDDisabled(false);
+                    setNamePlaceholder("");
+                    setName("");
+                    setIDPlaceholder("game id");
+                    setCategoryID("0");
+                    setShowResponse(false);
                   }}
                   className="dropdown-item"
                 >
@@ -388,9 +450,7 @@ export const Games = () => {
           </Col>
         </Form.Group>
 
-        {(categoryAddLoading ||
-          categoryUpdateLoading ||
-          categoryDeleteLoading) && (
+        {(addLoading || updateLoading || deleteLoading) && (
           <Form.Group>
             <Col>
               <Alert variant="info">Working...</Alert>
@@ -398,23 +458,24 @@ export const Games = () => {
           </Form.Group>
         )}
 
-        {showCategoryReponse && (
+        {showResponse && (
           <Form.Group>
             <Col>
-              <Alert variant={categoryVariant}>{categoryReponse}</Alert>
+              <Alert variant={variant}>{response}</Alert>
             </Col>
           </Form.Group>
         )}
       </Form>
 
       <ContentTable
-        categoriesLoading={categoriesLoading}
-        categoriesError={categoriesError}
-        categoriesData={categories}
-        deleteCategory={deleteCategory}
-        successCategoryDelete={successCategoryDelete}
-        errorCategoryDelete={errorCategoryDelete}
-        setShowCategoryResponse={setShowCategoryResponse}
+        gamesLoading={gamesLoading}
+        gamesError={gamesError}
+        gamesData={games}
+        deleteGame={deleteGame}
+        successDelete={successDelete}
+        errorDelete={errorDelete}
+        setShowResponse={setShowResponse}
+        tableClick={tableClick}
       />
     </div>
   );
