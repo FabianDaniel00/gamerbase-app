@@ -10,14 +10,14 @@
 .dev-form {
   width: 90%;
   max-width: 400px;
-  margin: 5% 0 5% 5%;
+  margin: 5% 0 10px 5%;
   background-color: #dbdbdb;
   padding: 20px;
   border-radius: 10px;
   float: left;
 }
 
-#confirm-password {
+#warning {
   border: 2px solid red;
   border-radius: 4px;
   box-shadow: 0 0 10px 0px red;

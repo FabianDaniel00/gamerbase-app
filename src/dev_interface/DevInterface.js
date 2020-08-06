@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import { Categories } from "./Categories";
 import { Games } from "./Games";
+import { Users } from "./Users";
+import { Rooms } from "./Rooms";
 
 class DevInterface extends Component {
   render() {
@@ -8,6 +10,8 @@ class DevInterface extends Component {
       <>
         <Categories />
         <Games />
+        <Users />
+        <Rooms />
       </>
     );
   }

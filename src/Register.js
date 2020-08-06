@@ -17,7 +17,7 @@ export const Register = (props) => {
   function handleSubmit() {
     if (confirmPassword !== password) {
       setShow(true);
-      setId("confirm-password");
+      setId("warning");
     } else {
       client
         .mutation({

@@ -117,7 +117,10 @@ const ContentTable = (props) => {
       <tbody>
         {categoriesData.map((category, key) => {
           return (
-            <tr onClick={() => tableClick(category.id)} key={key}>
+            <tr
+              onClick={() => tableClick(category.id, category.name)}
+              key={key}
+            >
               <td className="column">{category.id}</td>
               <td className="column">{category.name}</td>
               <td className="column">{category.slug}</td>
@@ -165,6 +168,8 @@ export const Categories = () => {
   const [categoryID, setCategoryID] = useState(String);
   const [categoryIDPlaceholder, setCategoryIDPlaceholder] = useState(String);
   const [categories, setCategories] = useState([]);
+  const [nameError, setNameError] = useState(String);
+  const [IDError, setIDError] = useState(String);
   const [categoryNamePlaceholder, setCategoryNamePlaceholder] = useState(
     "category name"
   );
@@ -179,9 +184,12 @@ export const Categories = () => {
     if (categoriesData) setCategories(categoriesData.allCategories.categories);
   });
 
-  function tableClick(id) {
-    if (categorySubmitEvent === "Update" || categorySubmitEvent === "Delete") {
-      setCategoryID(id);
+  function tableClick(_id, _name) {
+    if (categorySubmitEvent === "Update") {
+      setCategoryName(_name);
+      setCategoryID(_id);
+    } else if (categorySubmitEvent === "Delete") {
+      setCategoryID(_id);
     }
   }
 
@@ -191,10 +199,14 @@ export const Categories = () => {
     setCategoryName("");
     setCategoryID("");
     setShowCategoryResponse(true);
+    setNameError("");
   }
 
-  function errorCategoryAdd() {
-    setCategoryResponse(`Category '${categoryName}' was not added!`);
+  function errorCategoryAdd(error) {
+    if (error === "This category does exist!") {
+      setNameError("warning");
+    }
+    setCategoryResponse(`Category '${categoryName}' was not added! ${error}`);
     setCategoryVariant("danger");
     setShowCategoryResponse(true);
   }
@@ -207,10 +219,19 @@ export const Categories = () => {
     setCategoryName("");
     setCategoryID("");
     setShowCategoryResponse(true);
+    setNameError("");
+    setIDError("");
   }
 
-  function errorCategoryUpdate() {
-    setCategoryResponse(`Category ID: '${categoryID}' was not updated!`);
+  function errorCategoryUpdate(error) {
+    if (error === "This category does exist!") {
+      setNameError("warning");
+    } else if (error === "This category does not exist!") {
+      setIDError("warning");
+    }
+    setCategoryResponse(
+      `Category ID: '${categoryID}' was not updated! ${error}`
+    );
     setCategoryVariant("danger");
     setShowCategoryResponse(true);
   }
@@ -227,13 +248,20 @@ export const Categories = () => {
     setCategoryName("");
     setCategoryID("");
     setShowCategoryResponse(true);
+    setIDError("");
   }
 
   function errorCategoryDelete(id) {
     if (id) {
-      setCategoryResponse(`Category ID: '${id}' was not deleted!`);
+      setCategoryResponse(
+        `Category ID: '${id}' was not deleted! This category in not exist!`
+      );
+      setIDError("warning");
     } else {
-      setCategoryResponse(`Category ID: '${categoryID}' was not deleted!`);
+      setCategoryResponse(
+        `Category ID: '${categoryID}' was not deleted! This category in not exist!`
+      );
+      setIDError("warning");
     }
     setCategoryVariant("danger");
     setShowCategoryResponse(true);
@@ -247,7 +275,7 @@ export const Categories = () => {
           refetchQueries: [{ query: CATEGORIES }],
         })
           .then(() => successCategoryAdd())
-          .catch(() => errorCategoryAdd());
+          .catch((error) => errorCategoryAdd(error.message));
         break;
 
       case "Update":
@@ -256,7 +284,7 @@ export const Categories = () => {
           refetchQueries: [{ query: CATEGORIES }],
         })
           .then(() => successCategoryUpdate())
-          .catch(() => errorCategoryUpdate());
+          .catch((error) => errorCategoryUpdate(error.message));
         break;
 
       case "Delete":
@@ -274,9 +302,9 @@ export const Categories = () => {
         setCategoryVariant("danger");
     }
     if (addCategoryError) {
-      errorCategoryAdd();
+      errorCategoryAdd(addCategoryError.message);
     } else if (updateCategoryError) {
-      errorCategoryUpdate();
+      errorCategoryUpdate(updateCategoryError.message);
     } else if (deleteCategoryError) {
       errorCategoryDelete();
     }
@@ -286,7 +314,10 @@ export const Categories = () => {
     <div className="dev">
       <Form
         className="dev-form"
-        onSubmit={(event) => handleCategorySubmit(event.preventDefault())}
+        onSubmit={(event) => {
+          handleCategorySubmit(event.preventDefault());
+          setShowCategoryResponse(false);
+        }}
       >
         <div className="title-div">
           <Form.Label className="title">Category</Form.Label>
@@ -302,7 +333,9 @@ export const Categories = () => {
               onChange={(event) => {
                 setShowCategoryResponse(false);
                 setCategoryName(event.target.value);
+                setNameError("");
               }}
+              id={nameError}
               required
               disabled={categoryNameDisabled}
             />
@@ -319,7 +352,9 @@ export const Categories = () => {
               onChange={(event) => {
                 setShowCategoryResponse(false);
                 setCategoryID(event.target.value);
+                setIDError("");
               }}
+              id={IDError}
               required
               disabled={categoryIDDisabled}
             />
@@ -349,6 +384,8 @@ export const Categories = () => {
                     setCategoryIDPlaceholder("");
                     setCategoryID("");
                     setShowCategoryResponse(false);
+                    setNameError("");
+                    setIDError("");
                   }}
                   className="dropdown-item"
                 >
@@ -363,6 +400,8 @@ export const Categories = () => {
                     setCategoryNamePlaceholder("category name");
                     setCategoryIDPlaceholder("category id");
                     setShowCategoryResponse(false);
+                    setNameError("");
+                    setIDError("");
                   }}
                   className="dropdown-item"
                 >
@@ -378,6 +417,8 @@ export const Categories = () => {
                     setCategoryName("");
                     setCategoryIDPlaceholder("category id");
                     setShowCategoryResponse(false);
+                    setNameError("");
+                    setIDError("");
                   }}
                   className="dropdown-item"
                 >
