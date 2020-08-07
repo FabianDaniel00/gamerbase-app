@@ -37,7 +37,7 @@ const DELETE_CATEGORY = gql`
 
 const CATEGORIES = gql`
   {
-    allCategories(limit: 100, page: 1) {
+    allCategories(limit: 0, page: 1) {
       categories {
         id
         name

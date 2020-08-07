@@ -48,7 +48,7 @@ const DELETE_ROOM = gql`
 
 const ROOMS = gql`
   {
-    allRooms(limit: 100, page: 1) {
+    allRooms(limit: 0, page: 1) {
       rooms {
         id
         name
@@ -65,7 +65,7 @@ const ROOMS = gql`
 
 const GAMES = gql`
   {
-    allGames(limit: 100, page: 1) {
+    allGames(limit: 0, page: 1) {
       games {
         name
         id
@@ -311,10 +311,10 @@ export const Rooms = () => {
     setShowResponse(true);
   }
 
-  function convertToBoolean (value) {
+  function convertToBoolean(value) {
     if (value === "true") {
       setIsPrivate(true);
-    } else {
+    } else if (value === "false") {
       setIsPrivate(false);
     }
   }

@@ -3,6 +3,8 @@ import { Categories } from "./Categories";
 import { Games } from "./Games";
 import { Users } from "./Users";
 import { Rooms } from "./Rooms";
+import { Friendships } from "./Friendships";
+import { Posts } from "./Posts";
 
 class DevInterface extends Component {
   render() {
@@ -12,6 +14,8 @@ class DevInterface extends Component {
         <Games />
         <Users />
         <Rooms />
+        <Friendships />
+        <Posts />
       </>
     );
   }

@@ -43,7 +43,7 @@ const DELETE_GAME = gql`
 
 const GAMES = gql`
   {
-    allGames(limit: 100, page: 1) {
+    allGames(limit: 0, page: 1) {
       games {
         id
         name
@@ -59,7 +59,7 @@ const GAMES = gql`
 
 const CATEGORIES = gql`
   {
-    allCategories(limit: 100, page: 1) {
+    allCategories(limit: 0, page: 1) {
       categories {
         name
         id

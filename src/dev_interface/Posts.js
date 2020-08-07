@@ -12,35 +12,51 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import "../Form.scss";
 import "./Table.scss";
 
-const ADD_USER = gql`
-  mutation($userName: String!, $password: String!, $email: String!) {
-    createUser(
-      user: { userName: $userName, password: $password, email: $email }
-    ) {
-      userName
-      password
-      email
+const ADD_POST = gql`
+  mutation($posterID: Int!, $content: String!, $title: String!) {
+    createPost(post: { poster: $posterID, content: $content, title: $title }) {
+      poster {
+        id
+      }
+      title
+      content
     }
   }
 `;
 
-const UPDATE_USER = gql`
-  mutation($id: ID!, $userName: String!, $password: String!, $email: String!) {
-    updateUser(
+const UPDATE_POST = gql`
+  mutation($id: ID!, $posterID: ID!, $content: String!, $title: String!) {
+    updatePost(
       id: $id
-      user: { userName: $userName, password: $password, email: $email }
+      editor: $posterID
+      post: { content: $content, title: $title }
     ) {
       id
-      userName
-      password
-      email
+      content
+      title
     }
   }
 `;
 
-const DELETE_USER = gql`
+const DELETE_POST = gql`
   mutation($id: ID!) {
-    deleteUser(id: $id)
+    deletePost(id: $id)
+  }
+`;
+
+const POSTS = gql`
+  {
+    allPosts(limit: 0, page: 1) {
+      posts {
+        id
+        poster {
+          id
+          userName
+        }
+        title
+        content
+      }
+    }
   }
 `;
 
@@ -48,14 +64,8 @@ const USERS = gql`
   {
     allUsers(limit: 0, page: 1) {
       users {
-        id
         userName
-        email
-        stats
-        room {
-          name
-        }
-        slug
+        id
       }
     }
   }
@@ -63,27 +73,25 @@ const USERS = gql`
 
 const ContentTable = (props) => {
   const {
-    usersData,
-    usersLoading,
-    usersError,
-    deleteUser,
+    postsData,
+    postsLoading,
+    postsError,
+    deletePost,
     successDelete,
     errorDelete,
     setShowResponse,
     tableClick,
   } = props;
 
-  if (usersLoading) {
+  if (postsLoading) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Username</th>
-            <th>User Email</th>
-            <th>User Stat</th>
-            <th>User Room</th>
-            <th>User Slug</th>
+            <th>Poster</th>
+            <th>title</th>
+            <th>Content</th>
             <th className="text-center">Remove</th>
           </tr>
         </thead>
@@ -94,31 +102,29 @@ const ContentTable = (props) => {
     );
   }
 
-  if (usersError) {
+  if (postsError) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
           <tr>
             <th>ID</th>
-            <th>Username</th>
-            <th>User Email</th>
-            <th>User Stat</th>
-            <th>User Room</th>
-            <th>User Slug</th>
+            <th>Poster</th>
+            <th>title</th>
+            <th>Content</th>
             <th className="text-center">Remove</th>
           </tr>
         </thead>
         <tbody>
-          <tr className="text-center">Error! {usersError.message}</tr>
+          <tr className="text-center">Error! {postsError.message}</tr>
         </tbody>
       </Table>
     );
   }
 
   function remove(id) {
-    deleteUser({
+    deletePost({
       variables: { id: id },
-      refetchQueries: [{ query: USERS }],
+      refetchQueries: [{ query: POSTS }],
     })
       .then(() => successDelete(id))
       .catch(() => errorDelete(id));
@@ -129,34 +135,30 @@ const ContentTable = (props) => {
       <thead>
         <tr>
           <th>ID</th>
-          <th>Username</th>
-          <th>User Email</th>
-          <th>User Stat</th>
-          <th>User Room</th>
-          <th>User Slug</th>
+          <th>Poster</th>
+          <th>title</th>
+          <th>Content</th>
           <th className="text-center">Remove</th>
         </tr>
       </thead>
       <tbody>
-        {usersData.map((user, key) => {
+        {postsData.map((post, key) => {
           return (
             <tr
-              onClick={() => tableClick(user.userName, user.email, user.id)}
+              onClick={() => tableClick(post.poster.id, post.title, post.content, post.id)}
               key={key}
             >
-              <td className="column">{user.id}</td>
-              <td className="column">{user.userName}</td>
-              <td className="column">{user.email}</td>
-              <td className="column">{user.stats}</td>
-              <td className="column">{user.room}</td>
-              <td className="column">{user.email}</td>
+              <td className="column">{post.id}</td>
+              <td className="column">{post.poster.userName}</td>
+              <td className="column">{post.title}</td>
+              <td className="column">{post.content}</td>
               <td className="text-center">
                 <Button
                   variant="outline-primary"
                   size="sm"
                   onClick={() => {
                     setShowResponse(false);
-                    remove(user.id);
+                    remove(post.id);
                   }}
                 >
                   Remove
@@ -170,40 +172,45 @@ const ContentTable = (props) => {
   );
 };
 
-export const Users = () => {
-  const [createUser, { loading: addLoading, error: addError }] = useMutation(
-    ADD_USER
+export const Posts = () => {
+  const [createPost, { loading: addLoading, error: addError }] = useMutation(
+    ADD_POST
   );
   const [
-    updateUser,
+    updatePost,
     { loading: updateLoading, error: updateError },
-  ] = useMutation(UPDATE_USER);
+  ] = useMutation(UPDATE_POST);
   const [
-    deleteUser,
+    deletePost,
     { loading: deleteLoading, error: deleteError },
-  ] = useMutation(DELETE_USER);
+  ] = useMutation(DELETE_POST);
 
-  const [usernameDisabled, setUsernameDisabled] = useState(false);
-  const [passwordDisabled, setPasswordDisabled] = useState(false);
-  const [emailDisabled, setEmailDisabled] = useState(false);
+  const [posterIDDisabled, setPosterIDDisabled] = useState(false);
+  const [titleDisabled, setTitleDisabled] = useState(false);
+  const [contentDisabled, setContentDisabled] = useState(false);
   const [IDDisabled, setIDDisabled] = useState(true);
   const [submitEvent, setSubmitEvent] = useState("Add");
   const [variant, setVariant] = useState(String);
   const [response, setResponse] = useState(String);
   const [showResponse, setShowResponse] = useState(false);
-  const [username, setUsername] = useState(String);
-  const [password, setPassword] = useState(String);
-  const [email, setEmail] = useState(String);
+  const [posterID, setPosterID] = useState(String);
+  const [title, setTitle] = useState(String);
+  const [content, setContent] = useState(String);
   const [ID, setID] = useState(String);
-  const [usernamePlaceholder, setUsernamePlaceholder] = useState("username");
-  const [passwordPlaceholder, setPasswordPlaceholder] = useState("password");
-  const [emailPlaceholder, setEmailPlaceholder] = useState("email@address.com");
+  const [titlePlaceholder, setTitlePlaceholder] = useState("title...");
+  const [contentPlaceholder, setContentPlaceholder] = useState("content...");
   const [IDPlaceholder, setIDPlaceholder] = useState(String);
-  const [usernameError, setUsernameError] = useState(String);
-  const [emailError, setEmailError] = useState(String);
   const [IDError, setIDError] = useState(String);
+  const [posterError, setPosterError] = useState(String);
   const [required, setRequired] = useState(true);
+  const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
+
+  const {
+    loading: postsLoading,
+    error: postsError,
+    data: postsData,
+  } = useQuery(POSTS);
 
   const {
     loading: usersLoading,
@@ -212,78 +219,71 @@ export const Users = () => {
   } = useQuery(USERS);
 
   useEffect(() => {
+    if (postsData) setPosts(postsData.allPosts.posts);
     if (usersData) setUsers(usersData.allUsers.users);
   });
 
-  function tableClick(_username, _email, _id) {
-    if (submitEvent === "Delete") {
+  function tableClick(_poster, _title, _content, _id) {
+    if (submitEvent === "Update") {
+      setPosterID(_poster);
+      setTitle(_title);
+      setContent(_content);
       setID(_id);
-    } else if (submitEvent === "Update") {
-      setUsername(_username);
-      setEmail(_email);
+    } else if (submitEvent === "Delete") {
       setID(_id);
     }
   }
 
   function successAdd() {
-    setResponse(`Successfully added '${username}' user!`);
+    setResponse(`Successfully added '${title}' post!`);
     setVariant("success");
-    setUsername("");
-    setPassword("");
-    setEmail("");
+    setPosterID("");
+    setTitle("");
+    setContent("");
     setID("");
     setShowResponse(true);
-    setUsernameError("");
-    setEmailError("");
+    setPosterError("");
   }
 
   function errorAdd(error) {
-    if (error === "This username is exist!") {
-      setUsernameError("warning");
-    } else if (error === "This email is exist!") {
-      setEmailError("warning");
-    }
-    setResponse(`User '${username}' was not added! ${error}`);
+    setResponse(`Post '${title}' was not added! ${error}`);
     setVariant("danger");
     setShowResponse(true);
   }
 
   function successUpdate() {
-    setResponse(`Successfully updated ID: '${ID}' user to '${username}'!`);
+    setResponse(`Successfully updated ID: '${ID}' post to '${title}'!`);
     setVariant("success");
-    setUsername("");
-    setPassword("");
-    setEmail("");
+    setPosterID("");
+    setTitle("");
+    setContent("");
     setID("");
     setShowResponse(true);
-    setUsernameError("");
-    setEmailError("");
+    setPosterError("");
     setIDError("");
   }
 
   function errorUpdate(error) {
-    if (error === "This username is exist!") {
-      setUsernameError("warning");
-    } else if (error === "This email is exist!") {
-      setEmailError("warning");
-    } else if (error === "This user does not exist!") {
+    if (error === "This post is not yours!") {
+      setPosterError("warning");
+    } else if (error === "This post does not exist!") {
       setIDError("warning");
     }
-    setResponse(`User ID: '${ID}' was not updated! ${error}`);
+    setResponse(`Post ID: '${ID}' was not updated! ${error}`);
     setVariant("danger");
     setShowResponse(true);
   }
 
   function successDelete(id) {
     if (id) {
-      setResponse(`User ID: '${id}' was successfully deleted!`);
+      setResponse(`Post ID: '${id}' was successfully deleted!`);
     } else {
-      setResponse(`User ID: '${ID}' was successfully deleted!`);
+      setResponse(`Post ID: '${ID}' was successfully deleted!`);
     }
     setVariant("success");
-    setUsername("");
-    setPassword("");
-    setEmail("");
+    setPosterID("");
+    setTitle("");
+    setContent("");
     setID("");
     setShowResponse(true);
     setIDError("");
@@ -292,12 +292,12 @@ export const Users = () => {
   function errorDelete(id) {
     if (id) {
       setResponse(
-        `User ID: '${id}' was not deleted! This user does not exist!`
+        `Post ID: '${id}' was not deleted! This post does not exist!`
       );
       setIDError("warning");
     } else {
       setResponse(
-        `User ID: '${ID}' was not deleted! This user does not exist!`
+        `Post ID: '${ID}' was not deleted! This post does not exist!`
       );
       setIDError("warning");
     }
@@ -308,32 +308,32 @@ export const Users = () => {
   function handleSubmit() {
     switch (submitEvent) {
       case "Add":
-        createUser({
-          variables: { userName: username, password: password, email: email },
-          refetchQueries: [{ query: USERS }],
+        createPost({
+          variables: { posterID: posterID, title: title, content: content },
+          refetchQueries: [{ query: POSTS }],
         })
           .then(() => successAdd())
           .catch((error) => errorAdd(error.message));
         break;
 
       case "Update":
-        updateUser({
+        updatePost({
           variables: {
             id: ID,
-            userName: username,
-            password: password,
-            email: email,
+            posterID: posterID,
+            title: title,
+            content: content,
           },
-          refetchQueries: [{ query: USERS }],
+          refetchQueries: [{ query: POSTS }],
         })
           .then(() => successUpdate())
           .catch((error) => errorUpdate(error.message));
         break;
 
       case "Delete":
-        deleteUser({
+        deletePost({
           variables: { id: ID },
-          refetchQueries: [{ query: USERS }],
+          refetchQueries: [{ query: POSTS }],
         })
           .then(() => successDelete())
           .catch(() => errorDelete());
@@ -363,66 +363,74 @@ export const Users = () => {
         }}
       >
         <div className="title-div">
-          <Form.Label className="title">User</Form.Label>
+          <Form.Label className="title">Post</Form.Label>
         </div>
 
-        <Form.Group controlId="formHorizontalUsername">
-          <Form.Label column>Username</Form.Label>
+        <Form.Group controlId="formHorizontalPoster">
+          <Form.Label column>Poster</Form.Label>
+          <Col>
+            <Form.Control
+              as="select"
+              onChange={(event) => {
+                setShowResponse(false);
+                setPosterID(event.target.value);
+                setPosterError("");
+              }}
+              value={posterID}
+              id={posterError}
+              required
+              disabled={posterIDDisabled}
+            >
+              {usersLoading && <option>Loading...</option>}
+              {usersError && <option>Error! {usersError.message}</option>}
+              <option value="">Choose one poster...</option>
+              {users.map((user, key) => {
+                return (
+                  <option key={key} value={user.id}>
+                    {user.userName}
+                  </option>
+                );
+              })}
+            </Form.Control>
+          </Col>
+        </Form.Group>
+
+        <Form.Group controlId="formHorizontalTitle">
+          <Form.Label column>Post title</Form.Label>
           <Col>
             <Form.Control
               type="text"
-              placeholder={usernamePlaceholder}
-              value={username}
+              placeholder={titlePlaceholder}
+              value={title}
               onChange={(event) => {
                 setShowResponse(false);
-                setUsername(event.target.value);
-                setUsernameError("");
+                setTitle(event.target.value);
               }}
               required={required}
-              id={usernameError}
-              disabled={usernameDisabled}
+              disabled={titleDisabled}
             />
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalPassword">
-          <Form.Label column>User password</Form.Label>
+        <Form.Group controlId="formHorizontalContent">
+          <Form.Label column>Post Content</Form.Label>
           <Col>
             <Form.Control
-              type="password"
-              placeholder={passwordPlaceholder}
-              value={password}
+              type="text"
+              placeholder={contentPlaceholder}
+              value={content}
               onChange={(event) => {
                 setShowResponse(false);
-                setPassword(event.target.value);
+                setContent(event.target.value);
               }}
               required={required}
-              disabled={passwordDisabled}
-            />
-          </Col>
-        </Form.Group>
-
-        <Form.Group controlId="formHorizontalEmail">
-          <Form.Label column>User email</Form.Label>
-          <Col>
-            <Form.Control
-              type="email"
-              placeholder={emailPlaceholder}
-              value={email}
-              onChange={(event) => {
-                setShowResponse(false);
-                setEmail(event.target.value);
-                setEmailError("");
-              }}
-              id={emailError}
-              required={required}
-              disabled={emailDisabled}
+              disabled={contentDisabled}
             />
           </Col>
         </Form.Group>
 
         <Form.Group controlId="formHorizontalID">
-          <Form.Label column>User ID</Form.Label>
+          <Form.Label column>Post ID</Form.Label>
           <Col>
             <Form.Control
               type="number"
@@ -444,7 +452,7 @@ export const Users = () => {
           <Col>
             <Dropdown className="event-dropdown" drop="right" as={ButtonGroup}>
               <Button variant="primary" className="event-button" type="submit">
-                {submitEvent} user
+                {submitEvent} post
               </Button>
 
               <Dropdown.Toggle
@@ -457,20 +465,18 @@ export const Users = () => {
                 <Dropdown.Item
                   onClick={() => {
                     setSubmitEvent("Add");
-                    setUsernameDisabled(false);
-                    setPasswordDisabled(false);
-                    setEmailDisabled(false);
+                    setPosterIDDisabled(false);
+                    setTitleDisabled(false);
+                    setContentDisabled(false);
                     setIDDisabled(true);
-                    setUsernamePlaceholder("username");
-                    setPasswordPlaceholder("password");
-                    setEmailPlaceholder("email@address.com");
+                    setTitlePlaceholder("title...");
+                    setContentPlaceholder("content...");
                     setIDPlaceholder("");
                     setID("");
                     setShowResponse(false);
-                    setUsernameError("");
-                    setEmailError("");
-                    setIDError("");
                     setRequired(true);
+                    setPosterError("");
+                    setIDError("");
                   }}
                   className="dropdown-item"
                 >
@@ -480,19 +486,17 @@ export const Users = () => {
                 <Dropdown.Item
                   onClick={() => {
                     setSubmitEvent("Update");
-                    setUsernameDisabled(false);
-                    setPasswordDisabled(false);
-                    setEmailDisabled(false);
+                    setPosterIDDisabled(false);
+                    setTitleDisabled(false);
+                    setContentDisabled(false);
                     setIDDisabled(false);
-                    setUsernamePlaceholder("username");
-                    setPasswordPlaceholder("password");
-                    setEmailPlaceholder("email@address.com");
-                    setIDPlaceholder("user id");
+                    setTitlePlaceholder("title...");
+                    setContentPlaceholder("content...");
+                    setIDPlaceholder("game id");
                     setShowResponse(false);
-                    setUsernameError("");
-                    setEmailError("");
-                    setIDError("");
                     setRequired(false);
+                    setPosterError("");
+                    setIDError("");
                   }}
                   className="dropdown-item"
                 >
@@ -502,22 +506,20 @@ export const Users = () => {
                 <Dropdown.Item
                   onClick={() => {
                     setSubmitEvent("Delete");
-                    setUsernameDisabled(true);
-                    setPasswordDisabled(true);
-                    setEmailDisabled(true);
+                    setPosterIDDisabled(true);
+                    setTitleDisabled(true);
+                    setContentDisabled(true);
                     setIDDisabled(false);
-                    setUsernamePlaceholder("");
-                    setPasswordPlaceholder("");
-                    setEmailPlaceholder("");
-                    setIDPlaceholder("user id");
-                    setUsername("");
-                    setPassword("");
-                    setEmail("");
+                    setTitlePlaceholder("");
+                    setContentPlaceholder("");
+                    setIDPlaceholder("game id");
+                    setPosterID("");
+                    setTitle("");
+                    setContent("");
                     setShowResponse(false);
-                    setUsernameError("");
-                    setEmailError("");
-                    setIDError("");
                     setRequired(true);
+                    setPosterError("");
+                    setIDError("");
                   }}
                   className="dropdown-item"
                 >
@@ -546,10 +548,10 @@ export const Users = () => {
       </Form>
 
       <ContentTable
-        usersLoading={usersLoading}
-        usersError={usersError}
-        usersData={users}
-        deleteUser={deleteUser}
+        postsLoading={postsLoading}
+        postsError={postsError}
+        postsData={posts}
+        deletePost={deletePost}
         successDelete={successDelete}
         errorDelete={errorDelete}
         setShowResponse={setShowResponse}

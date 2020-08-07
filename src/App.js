@@ -32,7 +32,7 @@ const App = () => {
     .query({
       query: gql`
         {
-          allCategories(limit: 30, page: 1) {
+          allCategories(limit: 0, page: 1) {
             categories {
               name
               slug
@@ -51,7 +51,7 @@ const App = () => {
     .query({
       query: gql`
         {
-          allGames(limit: 30, page: 1) {
+          allGames(limit: 0, page: 1) {
             games {
               name
               slug
