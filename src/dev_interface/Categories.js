@@ -71,7 +71,20 @@ const ContentTable = (props) => {
           </tr>
         </thead>
         <tbody>
-          <tr className="text-center">Loading...</tr>
+          <tr>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+          </tr>
         </tbody>
       </Table>
     );
@@ -149,10 +162,12 @@ export const Categories = () => {
     createCategory,
     { loading: categoryAddLoading, error: addCategoryError },
   ] = useMutation(ADD_CATEGORY);
+
   const [
     updateCategory,
     { loading: categoryUpdateLoading, error: updateCategoryError },
   ] = useMutation(UPDATE_CATEGORY);
+
   const [
     deleteCategory,
     { loading: categoryDeleteLoading, error: deleteCategoryError },
@@ -182,7 +197,7 @@ export const Categories = () => {
 
   useEffect(() => {
     if (categoriesData) setCategories(categoriesData.allCategories.categories);
-  });
+  }, [categoriesData]);
 
   function tableClick(_id, _name) {
     if (categorySubmitEvent === "Update") {
@@ -254,12 +269,12 @@ export const Categories = () => {
   function errorCategoryDelete(id) {
     if (id) {
       setCategoryResponse(
-        `Category ID: '${id}' was not deleted! This category in not exist!`
+        `Category ID: '${id}' was not deleted! This category does not exist!`
       );
       setIDError("warning");
     } else {
       setCategoryResponse(
-        `Category ID: '${categoryID}' was not deleted! This category in not exist!`
+        `Category ID: '${categoryID}' was not deleted! This category does not exist!`
       );
       setIDError("warning");
     }
@@ -308,6 +323,8 @@ export const Categories = () => {
     } else if (deleteCategoryError) {
       errorCategoryDelete();
     }
+    setNameError("");
+    setIDError("");
   }
 
   return (
@@ -434,7 +451,9 @@ export const Categories = () => {
           categoryDeleteLoading) && (
           <Form.Group>
             <Col>
-              <Alert variant="info">Working...</Alert>
+              <Alert className="text-center" variant="info">
+                <i className="fas fa-spinner fa-spin" />
+              </Alert>
             </Col>
           </Form.Group>
         )}

@@ -88,7 +88,29 @@ const ContentTable = (props) => {
           </tr>
         </thead>
         <tbody>
-          <tr className="text-center">Loading...</tr>
+          <tr>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+          </tr>
         </tbody>
       </Table>
     );
@@ -174,10 +196,12 @@ export const Users = () => {
   const [createUser, { loading: addLoading, error: addError }] = useMutation(
     ADD_USER
   );
+
   const [
     updateUser,
     { loading: updateLoading, error: updateError },
   ] = useMutation(UPDATE_USER);
+
   const [
     deleteUser,
     { loading: deleteLoading, error: deleteError },
@@ -213,7 +237,7 @@ export const Users = () => {
 
   useEffect(() => {
     if (usersData) setUsers(usersData.allUsers.users);
-  });
+  }, [usersData]);
 
   function tableClick(_username, _email, _id) {
     if (submitEvent === "Delete") {
@@ -351,6 +375,9 @@ export const Users = () => {
     } else if (deleteError) {
       errorDelete();
     }
+    setUsernameError("");
+    setEmailError("");
+    setIDError("");
   }
 
   return (
@@ -421,7 +448,7 @@ export const Users = () => {
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalID">
+        <Form.Group controlId="formHorizontalUserID">
           <Form.Label column>User ID</Form.Label>
           <Col>
             <Form.Control
@@ -531,7 +558,9 @@ export const Users = () => {
         {(addLoading || updateLoading || deleteLoading) && (
           <Form.Group>
             <Col>
-              <Alert variant="info">Working...</Alert>
+              <Alert className="text-center" variant="info">
+                <i className="fas fa-spinner fa-spin" />
+              </Alert>
             </Col>
           </Form.Group>
         )}

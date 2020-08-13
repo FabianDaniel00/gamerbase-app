@@ -98,7 +98,26 @@ const ContentTable = (props) => {
           </tr>
         </thead>
         <tbody>
-          <tr className="text-center">Loading...</tr>
+          <tr>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+          </tr>
         </tbody>
       </Table>
     );
@@ -259,7 +278,7 @@ export const Friendships = () => {
     if (friendshipsData)
       setFriendships(friendshipsData.allFriendships.friendship);
     if (usersData) setUsers(usersData.allUsers.users);
-  });
+  }, [friendshipsData, usersData]);
 
   function tableClick(_id) {
     if (submitEvent === "Accept" || submitEvent === "Delete") {
@@ -382,6 +401,8 @@ export const Friendships = () => {
     } else if (deleteError) {
       errorDelete();
     }
+    setSRError("");
+    setIDError("");
   }
 
   return (
@@ -414,7 +435,7 @@ export const Friendships = () => {
             >
               {usersLoading && <option>Loading...</option>}
               {usersError && <option>Error! {usersError.message}</option>}
-              <option value="">Sender...</option>
+              {usersData && <option value="">Sender...</option>}
               {users.map((user, key) => {
                 return (
                   <option key={key} value={user.id}>
@@ -443,7 +464,7 @@ export const Friendships = () => {
             >
               {usersLoading && <option>Loading...</option>}
               {usersError && <option>Error! {usersError.message}</option>}
-              <option value="">Reciver...</option>
+              {usersData && <option value="">Reciver...</option>}
               {users.map((user, key) => {
                 return (
                   <option key={key} value={user.id}>
@@ -455,7 +476,7 @@ export const Friendships = () => {
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalID">
+        <Form.Group controlId="formHorizontalFriendshipID">
           <Form.Label column>Friendship ID</Form.Label>
           <Col>
             <Form.Control
@@ -548,7 +569,9 @@ export const Friendships = () => {
         {(addLoading || acceptLoading || deleteLoading) && (
           <Form.Group>
             <Col>
-              <Alert variant="info">Working...</Alert>
+              <Alert className="text-center" variant="info">
+                <i className="fas fa-spinner fa-spin" />
+              </Alert>
             </Col>
           </Form.Group>
         )}

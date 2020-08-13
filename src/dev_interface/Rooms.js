@@ -100,7 +100,26 @@ const ContentTable = (props) => {
           </tr>
         </thead>
         <tbody>
-          <tr className="text-center">Loading...</tr>
+          <tr>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+          </tr>
         </tbody>
       </Table>
     );
@@ -188,10 +207,12 @@ export const Rooms = () => {
   const [createRoom, { loading: addLoading, error: addError }] = useMutation(
     ADD_ROOM
   );
+
   const [
     updateRoom,
     { loading: updateLoading, error: updateError },
   ] = useMutation(UPDATE_ROOM);
+
   const [
     deleteRoom,
     { loading: deleteLoading, error: deleteError },
@@ -231,7 +252,7 @@ export const Rooms = () => {
   useEffect(() => {
     if (roomsData) setRooms(roomsData.allRooms.rooms);
     if (gamesData) setGames(gamesData.allGames.games);
-  });
+  }, [roomsData, gamesData]);
 
   function tableClick(_name, _gameID, _isPrivate, _id) {
     if (submitEvent === "Update") {
@@ -369,6 +390,7 @@ export const Rooms = () => {
     } else if (deleteError) {
       errorDelete();
     }
+    setIDError("");
   }
 
   return (
@@ -416,7 +438,7 @@ export const Rooms = () => {
             >
               {gamesLoading && <option>Loading...</option>}
               {gamesError && <option>Error! {gamesError.message}</option>}
-              <option value="">Choose one game...</option>
+              {gamesData && <option value="">Choose one game...</option>}
               {games.map((game, key) => {
                 return (
                   <option key={key} value={game.id}>
@@ -449,7 +471,7 @@ export const Rooms = () => {
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalID">
+        <Form.Group controlId="formHorizontalRoomID">
           <Form.Label column>Room ID</Form.Label>
           <Col>
             <Form.Control
@@ -547,7 +569,9 @@ export const Rooms = () => {
         {(addLoading || updateLoading || deleteLoading) && (
           <Form.Group>
             <Col>
-              <Alert variant="info">Working...</Alert>
+              <Alert className="text-center" variant="info">
+                <i className="fas fa-spinner fa-spin" />
+              </Alert>
             </Col>
           </Form.Group>
         )}

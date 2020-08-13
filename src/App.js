@@ -42,9 +42,12 @@ const App = () => {
       `,
     })
     .then(({ loading, error, data }) => {
-      if (loading) return <a>Loading categories...</a>;
-      if (error) return <a>Error! {error.message}</a>;
+      if (loading) return <p>Loading categories...</p>;
+      if (error) return <p>Error! {error.message}</p>;
       if (data) setCategories(data.allCategories.categories);
+    })
+    .catch((error) => {
+      return <p>Error! {error.message}</p>;
     });
 
   client
@@ -64,9 +67,12 @@ const App = () => {
       `,
     })
     .then(({ loading, error, data }) => {
-      if (loading) return <a>Loading games...</a>;
-      if (error) return <a>Error! {error.message}</a>;
+      if (loading) return <p>Loading games...</p>;
+      if (error) return <p>Error! {error.message}</p>;
       if (data) setGames(data.allGames.games);
+    })
+    .catch((error) => {
+      return <p>Error! {error.message}</p>;
     });
 
   const useWindowSize = () => {

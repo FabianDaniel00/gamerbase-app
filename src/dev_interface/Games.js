@@ -93,7 +93,23 @@ const ContentTable = (props) => {
           </tr>
         </thead>
         <tbody>
-          <tr className="text-center">Loading...</tr>
+          <tr>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
+          </tr>
         </tbody>
       </Table>
     );
@@ -173,10 +189,12 @@ export const Games = () => {
   const [createGame, { loading: addLoading, error: addError }] = useMutation(
     ADD_GAME
   );
+
   const [
     updateGame,
     { loading: updateLoading, error: updateError },
   ] = useMutation(UPDATE_GAME);
+
   const [
     deleteGame,
     { loading: deleteLoading, error: deleteError },
@@ -215,7 +233,7 @@ export const Games = () => {
   useEffect(() => {
     if (gamesData) setGames(gamesData.allGames.games);
     if (categoriesData) setCategories(categoriesData.allCategories.categories);
-  });
+  }, [gamesData, categoriesData]);
 
   function tableClick(_name, _categoryID, _id) {
     if (submitEvent === "Update") {
@@ -339,6 +357,8 @@ export const Games = () => {
     } else if (deleteError) {
       errorDelete();
     }
+    setNameError("");
+    setIDError("");
   }
 
   return (
@@ -390,7 +410,9 @@ export const Games = () => {
               {categoriesError && (
                 <option>Error! {categoriesError.message}</option>
               )}
-              <option value="">Choose one category...</option>
+              {categoriesData && (
+                <option value="">Choose one category...</option>
+              )}
               {categories.map((category, key) => {
                 return (
                   <option key={key} value={category.id}>
@@ -499,7 +521,9 @@ export const Games = () => {
         {(addLoading || updateLoading || deleteLoading) && (
           <Form.Group>
             <Col>
-              <Alert variant="info">Working...</Alert>
+              <Alert className="text-center" variant="info">
+                <i className="fas fa-spinner fa-spin" />
+              </Alert>
             </Col>
           </Form.Group>
         )}

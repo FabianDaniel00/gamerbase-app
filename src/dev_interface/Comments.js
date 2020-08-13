@@ -12,48 +12,50 @@ import { gql, useMutation, useQuery } from "@apollo/client";
 import "../Form.scss";
 import "./Table.scss";
 
-const ADD_POST = gql`
-  mutation($posterID: Int!, $content: String!, $title: String!) {
-    createPost(post: { poster: $posterID, content: $content, title: $title }) {
+const ADD_COMMENT = gql`
+  mutation($posterID: Int!, $postID: Int!, $content: String!) {
+    createComment(
+      comment: { poster: $posterID, post: $postID, content: $content }
+    ) {
       poster {
         id
       }
-      title
+      post {
+        id
+      }
       content
     }
   }
 `;
 
-const UPDATE_POST = gql`
-  mutation($id: ID!, $posterID: ID!, $content: String!, $title: String!) {
-    updatePost(
-      id: $id
-      editor: $posterID
-      post: { content: $content, title: $title }
-    ) {
+const UPDATE_COMMENT = gql`
+  mutation($id: ID!, $posterID: ID!, $content: String!) {
+    updateComment(id: $id, editor: $posterID, comment: { content: $content }) {
       id
       content
-      title
     }
   }
 `;
 
-const DELETE_POST = gql`
-  mutation($id: ID!, $posterID: Int!) {
+const DELETE_COMMENT = gql`
+  mutation($id: ID!, $posterID: ID!) {
     deletePost(id: $id, editor: $posterID)
   }
 `;
 
-const POSTS = gql`
+const COMMENTS = gql`
   {
-    allPosts(limit: 0, page: 1) {
-      posts {
+    allComments(limit: 0, page: 1) {
+      comments {
         id
         poster {
           id
           userName
         }
-        title
+        post {
+          id
+          title
+        }
         content
       }
     }
@@ -71,26 +73,37 @@ const USERS = gql`
   }
 `;
 
+const POSTS = gql`
+  {
+    allPosts(limit: 0, page: 1) {
+      posts {
+        title
+        id
+      }
+    }
+  }
+`;
+
 const ContentTable = (props) => {
   const {
-    postsData,
-    postsLoading,
-    postsError,
-    deletePost,
+    commentsData,
+    commentsLoading,
+    commentsError,
+    deleteComment,
     successDelete,
     errorDelete,
     setShowResponse,
     tableClick,
   } = props;
 
-  if (postsLoading) {
+  if (commentsLoading) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
           <tr>
             <th>ID</th>
             <th>Poster</th>
-            <th>title</th>
+            <th>Post Title</th>
             <th>Content</th>
             <th className="text-center">Remove</th>
           </tr>
@@ -118,29 +131,29 @@ const ContentTable = (props) => {
     );
   }
 
-  if (postsError) {
+  if (commentsError) {
     return (
       <Table className="content-table" striped bordered hover size="sm">
         <thead>
           <tr>
             <th>ID</th>
             <th>Poster</th>
-            <th>title</th>
+            <th>Post Title</th>
             <th>Content</th>
             <th className="text-center">Remove</th>
           </tr>
         </thead>
         <tbody>
-          <tr className="text-center">Error! {postsError.message}</tr>
+          <tr className="text-center">Error! {commentsError.message}</tr>
         </tbody>
       </Table>
     );
   }
 
   function remove(id, posterID) {
-    deletePost({
+    deleteComment({
       variables: { id: id, editor: posterID },
-      refetchQueries: [{ query: POSTS }],
+      refetchQueries: [{ query: COMMENTS }],
     })
       .then(() => successDelete(id))
       .catch((error) => errorDelete(id, error.message));
@@ -152,31 +165,36 @@ const ContentTable = (props) => {
         <tr>
           <th>ID</th>
           <th>Poster</th>
-          <th>title</th>
+          <th>Post Title</th>
           <th>Content</th>
           <th className="text-center">Remove</th>
         </tr>
       </thead>
       <tbody>
-        {postsData.map((post, key) => {
+        {commentsData.map((comment, key) => {
           return (
             <tr
               onClick={() =>
-                tableClick(post.poster.id, post.title, post.content, post.id)
+                tableClick(
+                  comment.poster.id,
+                  comment.post.id,
+                  comment.content,
+                  comment.id
+                )
               }
               key={key}
             >
-              <td className="column">{post.id}</td>
-              <td className="column">{post.poster.userName}</td>
-              <td className="column">{post.title}</td>
-              <td className="column">{post.content}</td>
+              <td className="column">{comment.id}</td>
+              <td className="column">{comment.poster.userName}</td>
+              <td className="column">{comment.post.title}</td>
+              <td className="column">{comment.content}</td>
               <td className="text-center">
                 <Button
                   variant="outline-primary"
                   size="sm"
                   onClick={() => {
                     setShowResponse(false);
-                    remove(post.id, post.poster.id);
+                    remove(comment.id, comment.poster.id);
                   }}
                 >
                   Remove
@@ -190,23 +208,23 @@ const ContentTable = (props) => {
   );
 };
 
-export const Posts = () => {
-  const [createPost, { loading: addLoading, error: addError }] = useMutation(
-    ADD_POST
+export const Comments = () => {
+  const [createComment, { loading: addLoading, error: addError }] = useMutation(
+    ADD_COMMENT
   );
 
   const [
-    updatePost,
+    updateComment,
     { loading: updateLoading, error: updateError },
-  ] = useMutation(UPDATE_POST);
+  ] = useMutation(UPDATE_COMMENT);
 
   const [
-    deletePost,
+    deleteComment,
     { loading: deleteLoading, error: deleteError },
-  ] = useMutation(DELETE_POST);
+  ] = useMutation(DELETE_COMMENT);
 
   const [posterIDDisabled, setPosterIDDisabled] = useState(false);
-  const [titleDisabled, setTitleDisabled] = useState(false);
+  const [postDisabled, setPostDisabled] = useState(false);
   const [contentDisabled, setContentDisabled] = useState(false);
   const [IDDisabled, setIDDisabled] = useState(true);
   const [submitEvent, setSubmitEvent] = useState("Add");
@@ -214,17 +232,23 @@ export const Posts = () => {
   const [response, setResponse] = useState(String);
   const [showResponse, setShowResponse] = useState(false);
   const [posterID, setPosterID] = useState(String);
-  const [title, setTitle] = useState(String);
+  const [postID, setPostID] = useState(String);
   const [content, setContent] = useState(String);
   const [ID, setID] = useState(String);
-  const [titlePlaceholder, setTitlePlaceholder] = useState("title...");
   const [contentPlaceholder, setContentPlaceholder] = useState("content...");
   const [IDPlaceholder, setIDPlaceholder] = useState(String);
   const [IDError, setIDError] = useState(String);
   const [posterError, setPosterError] = useState(String);
   const [required, setRequired] = useState(true);
+  const [comments, setComments] = useState([]);
   const [posts, setPosts] = useState([]);
   const [users, setUsers] = useState([]);
+
+  const {
+    loading: commentsLoading,
+    error: commentsError,
+    data: commentsData,
+  } = useQuery(COMMENTS);
 
   const {
     loading: postsLoading,
@@ -239,14 +263,15 @@ export const Posts = () => {
   } = useQuery(USERS);
 
   useEffect(() => {
+    if (commentsData) setComments(commentsData.allComments.comments);
     if (postsData) setPosts(postsData.allPosts.posts);
     if (usersData) setUsers(usersData.allUsers.users);
-  }, [postsData, usersData]);
+  }, [commentsData, postsData, usersData]);
 
-  function tableClick(_poster, _title, _content, _id) {
+  function tableClick(_poster, _post, _content, _id) {
     if (submitEvent === "Update") {
       setPosterID(_poster);
-      setTitle(_title);
+      setPostID(_post);
       setContent(_content);
       setID(_id);
     } else if (submitEvent === "Delete") {
@@ -256,10 +281,10 @@ export const Posts = () => {
   }
 
   function successAdd() {
-    setResponse(`Successfully added '${title}' post!`);
+    setResponse(`Successfully added ID: '${ID}' comment!`);
     setVariant("success");
     setPosterID("");
-    setTitle("");
+    setPostID("");
     setContent("");
     setID("");
     setShowResponse(true);
@@ -267,16 +292,16 @@ export const Posts = () => {
   }
 
   function errorAdd(error) {
-    setResponse(`Post '${title}' was not added! ${error}`);
+    setResponse(`Comment ID: '${ID}' was not added! ${error}`);
     setVariant("danger");
     setShowResponse(true);
   }
 
   function successUpdate() {
-    setResponse(`Successfully updated ID: '${ID}' post to '${title}'!`);
+    setResponse(`Successfully updated ID: '${ID}' comment!`);
     setVariant("success");
     setPosterID("");
-    setTitle("");
+    setPostID("");
     setContent("");
     setID("");
     setShowResponse(true);
@@ -285,25 +310,25 @@ export const Posts = () => {
   }
 
   function errorUpdate(error) {
-    if (error === "This post is not yours!") {
+    if (error === "This comment is not yours!") {
       setPosterError("warning");
-    } else if (error === "This post does not exist!") {
+    } else if (error === "This comment does not exist or it was removed!") {
       setIDError("warning");
     }
-    setResponse(`Post ID: '${ID}' was not updated! ${error}`);
+    setResponse(`Comment ID: '${ID}' was not updated! ${error}`);
     setVariant("danger");
     setShowResponse(true);
   }
 
   function successDelete(id) {
     if (id) {
-      setResponse(`Post ID: '${id}' was successfully deleted!`);
+      setResponse(`Comment ID: '${id}' was successfully deleted!`);
     } else {
-      setResponse(`Post ID: '${ID}' was successfully deleted!`);
+      setResponse(`Comment ID: '${ID}' was successfully deleted!`);
     }
     setVariant("success");
     setPosterID("");
-    setTitle("");
+    setPostID("");
     setContent("");
     setID("");
     setShowResponse(true);
@@ -312,18 +337,18 @@ export const Posts = () => {
   }
 
   function errorDelete(error) {
-    if (error === "This post is not yours!") {
+    if (error === "This comment is not yours!") {
       setPosterError("warning");
-    } else if (error === "This post does not exist") {
+    } else if (error === "This comment does not exist") {
       setIDError("warning");
     }
-    setResponse(`Post ID: '${ID}' was not deleted! ${error}`);
+    setResponse(`Comment ID: '${ID}' was not deleted! ${error}`);
     setVariant("danger");
     setShowResponse(true);
   }
 
   function errorDelete_(id, error) {
-    setResponse(`Post ID: '${id}' was not deleted! ${error}`);
+    setResponse(`Comment ID: '${id}' was not deleted! ${error}`);
     setVariant("danger");
     setShowResponse(true);
   }
@@ -331,32 +356,31 @@ export const Posts = () => {
   function handleSubmit() {
     switch (submitEvent) {
       case "Add":
-        createPost({
-          variables: { posterID: posterID, title: title, content: content },
-          refetchQueries: [{ query: POSTS }],
+        createComment({
+          variables: { posterID: posterID, postID: postID, content: content },
+          refetchQueries: [{ query: COMMENTS }],
         })
           .then(() => successAdd())
           .catch((error) => errorAdd(error.message));
         break;
 
       case "Update":
-        updatePost({
+        updateComment({
           variables: {
             id: ID,
             posterID: posterID,
-            title: title,
             content: content,
           },
-          refetchQueries: [{ query: POSTS }],
+          refetchQueries: [{ query: COMMENTS }],
         })
           .then(() => successUpdate())
           .catch((error) => errorUpdate(error.message));
         break;
 
       case "Delete":
-        deletePost({
+        deleteComment({
           variables: { id: ID, posterID: posterID },
-          refetchQueries: [{ query: POSTS }],
+          refetchQueries: [{ query: COMMENTS }],
         })
           .then(() => successDelete())
           .catch((error) => errorDelete(error.message));
@@ -388,10 +412,10 @@ export const Posts = () => {
         }}
       >
         <div className="title-div">
-          <Form.Label className="title">Post</Form.Label>
+          <Form.Label className="title">Comment</Form.Label>
         </div>
 
-        <Form.Group controlId="formHorizontalPoster">
+        <Form.Group controlId="formHorizontalPoster_">
           <Form.Label column>Poster</Form.Label>
           <Col>
             <Form.Control
@@ -420,28 +444,38 @@ export const Posts = () => {
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalTitle">
-          <Form.Label column>Post title</Form.Label>
+        <Form.Group controlId="formHorizontalPost">
+          <Form.Label column>Post</Form.Label>
           <Col>
             <Form.Control
-              type="text"
-              placeholder={titlePlaceholder}
-              value={title}
+              as="select"
               onChange={(event) => {
                 setShowResponse(false);
-                setTitle(event.target.value);
+                setPostID(event.target.value);
               }}
-              required={required}
-              disabled={titleDisabled}
-            />
+              value={postID}
+              required
+              disabled={postDisabled}
+            >
+              {postsLoading && <option>Loading...</option>}
+              {postsError && <option>Error! {postsError.message}</option>}
+              {postsData && <option value="">Choose one post...</option>}
+              {posts.map((post, key) => {
+                return (
+                  <option key={key} value={post.id}>
+                    {post.title}
+                  </option>
+                );
+              })}
+            </Form.Control>
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalContent">
-          <Form.Label column>Post Content</Form.Label>
+        <Form.Group controlId="formHorizontalContent_">
+          <Form.Label column>Comment Content</Form.Label>
           <Col>
             <Form.Control
-              type="textarea"
+              type="text"
               placeholder={contentPlaceholder}
               value={content}
               onChange={(event) => {
@@ -454,8 +488,8 @@ export const Posts = () => {
           </Col>
         </Form.Group>
 
-        <Form.Group controlId="formHorizontalPostID">
-          <Form.Label column>Post ID</Form.Label>
+        <Form.Group controlId="formHorizontalCommentID">
+          <Form.Label column>Comment ID</Form.Label>
           <Col>
             <Form.Control
               type="number"
@@ -477,7 +511,7 @@ export const Posts = () => {
           <Col>
             <Dropdown className="event-dropdown" drop="right" as={ButtonGroup}>
               <Button variant="primary" className="event-button" type="submit">
-                {submitEvent} post
+                {submitEvent} comment
               </Button>
 
               <Dropdown.Toggle
@@ -491,10 +525,9 @@ export const Posts = () => {
                   onClick={() => {
                     setSubmitEvent("Add");
                     setPosterIDDisabled(false);
-                    setTitleDisabled(false);
+                    setPostDisabled(false);
                     setContentDisabled(false);
                     setIDDisabled(true);
-                    setTitlePlaceholder("title...");
                     setContentPlaceholder("content...");
                     setIDPlaceholder("");
                     setID("");
@@ -512,10 +545,9 @@ export const Posts = () => {
                   onClick={() => {
                     setSubmitEvent("Update");
                     setPosterIDDisabled(false);
-                    setTitleDisabled(false);
+                    setPostDisabled(true);
                     setContentDisabled(false);
                     setIDDisabled(false);
-                    setTitlePlaceholder("title...");
                     setContentPlaceholder("content...");
                     setIDPlaceholder("game id");
                     setShowResponse(false);
@@ -532,14 +564,13 @@ export const Posts = () => {
                   onClick={() => {
                     setSubmitEvent("Delete");
                     setPosterIDDisabled(false);
-                    setTitleDisabled(true);
+                    setPostDisabled(true);
                     setContentDisabled(true);
                     setIDDisabled(false);
-                    setTitlePlaceholder("");
                     setContentPlaceholder("");
                     setIDPlaceholder("game id");
                     setPosterID("");
-                    setTitle("");
+                    setPostID("");
                     setContent("");
                     setShowResponse(false);
                     setRequired(true);
@@ -575,10 +606,10 @@ export const Posts = () => {
       </Form>
 
       <ContentTable
-        postsLoading={postsLoading}
-        postsError={postsError}
-        postsData={posts}
-        deletePost={deletePost}
+        commentsLoading={commentsLoading}
+        commentsError={commentsError}
+        commentsData={comments}
+        deleteComment={deleteComment}
         successDelete={successDelete}
         errorDelete={errorDelete_}
         setShowResponse={setShowResponse}
