@@ -39,7 +39,7 @@ const UPDATE_COMMENT = gql`
 
 const DELETE_COMMENT = gql`
   mutation($id: ID!, $posterID: ID!) {
-    deletePost(id: $id, editor: $posterID)
+    deleteComment(id: $id, editor: $posterID)
   }
 `;
 
@@ -152,7 +152,7 @@ const ContentTable = (props) => {
 
   function remove(id, posterID) {
     deleteComment({
-      variables: { id: id, editor: posterID },
+      variables: { id: id, posterID: posterID },
       refetchQueries: [{ query: COMMENTS }],
     })
       .then(() => successDelete(id))
@@ -339,7 +339,7 @@ export const Comments = () => {
   function errorDelete(error) {
     if (error === "This comment is not yours!") {
       setPosterError("warning");
-    } else if (error === "This comment does not exist") {
+    } else if (error === "This comment does not exist!") {
       setIDError("warning");
     }
     setResponse(`Comment ID: '${ID}' was not deleted! ${error}`);

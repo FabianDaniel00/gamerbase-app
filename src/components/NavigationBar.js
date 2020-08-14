@@ -96,7 +96,14 @@ const Styles = styled.div`
 
 class NavigationBar extends Component {
   render() {
-    const { categories, games } = this.props;
+    const {
+      categoriesLoading,
+      categoriesError,
+      gamesLoading,
+      gamesError,
+      categories,
+      games,
+    } = this.props;
     return (
       <Styles>
         <Navbar collapseOnSelect expand="lg" variant="dark">
@@ -105,6 +112,8 @@ class NavigationBar extends Component {
           <Navbar.Collapse id="responsive-navbar-nav">
             <Nav className="mr-auto">
               <NavDropdown title="Categories" id="collasible-nav-dropdown">
+                {categoriesLoading && <Dropdown>Loading...</Dropdown>}
+                {categoriesError && <Dropdown>{categoriesError}</Dropdown>}
                 {categories.map((category, key) => {
                   return (
                     <Dropdown
@@ -128,6 +137,12 @@ class NavigationBar extends Component {
                       />
 
                       <Dropdown.Menu>
+                        {gamesLoading && (
+                          <Dropdown.Item>Loading...</Dropdown.Item>
+                        )}
+                        {gamesError && (
+                          <Dropdown.Item>{gamesError}</Dropdown.Item>
+                        )}
                         {games
                           .filter(
                             (game) => game.category.name === category.name

@@ -39,7 +39,7 @@ const UPDATE_POST = gql`
 `;
 
 const DELETE_POST = gql`
-  mutation($id: ID!, $posterID: Int!) {
+  mutation($id: ID!, $posterID: ID!) {
     deletePost(id: $id, editor: $posterID)
   }
 `;
@@ -139,7 +139,7 @@ const ContentTable = (props) => {
 
   function remove(id, posterID) {
     deletePost({
-      variables: { id: id, editor: posterID },
+      variables: { id: id, posterID: posterID },
       refetchQueries: [{ query: POSTS }],
     })
       .then(() => successDelete(id))

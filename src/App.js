@@ -26,7 +26,11 @@ const client = new ApolloClient({
 
 const App = () => {
   const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [categoriesError, setCategoriesError] = useState(String);
   const [games, setGames] = useState([]);
+  const [gamesLoading, setGamesLoading] = useState(true);
+  const [gamesError, setGamesError] = useState(String);
 
   client
     .query({
@@ -41,13 +45,15 @@ const App = () => {
         }
       `,
     })
-    .then(({ loading, error, data }) => {
-      if (loading) return <p>Loading categories...</p>;
-      if (error) return <p>Error! {error.message}</p>;
-      if (data) setCategories(data.allCategories.categories);
+    .then(({ error, data }) => {
+      if (error) setCategoriesError(error.message);
+      if (data) {
+        setCategories(data.allCategories.categories);
+        setCategoriesLoading(false);
+      }
     })
     .catch((error) => {
-      return <p>Error! {error.message}</p>;
+      setCategoriesError(error.message);
     });
 
   client
@@ -66,13 +72,15 @@ const App = () => {
         }
       `,
     })
-    .then(({ loading, error, data }) => {
-      if (loading) return <p>Loading games...</p>;
-      if (error) return <p>Error! {error.message}</p>;
-      if (data) setGames(data.allGames.games);
+    .then(({ error, data }) => {
+      if (error) setGamesError(error.message);
+      if (data) {
+        setGames(data.allGames.games);
+        setGamesLoading(false);
+      }
     })
     .catch((error) => {
-      return <p>Error! {error.message}</p>;
+      setGamesError(error.message);
     });
 
   const useWindowSize = () => {
@@ -94,17 +102,38 @@ const App = () => {
         {useWindowSize() <= 500 && (
           <Headroom>
             <div className="sticky-navbar">
-              <NavigationBar categories={categories} games={games} />
+              <NavigationBar
+                categoriesLoading={categoriesLoading}
+                categoriesError={categoriesError}
+                gamesLoading={gamesLoading}
+                gamesError={gamesError}
+                categories={categories}
+                games={games}
+              />
             </div>
           </Headroom>
         )}
         {useWindowSize() > 500 && (
           <div className="sticky-navbar">
-            <NavigationBar categories={categories} games={games} />
+            <NavigationBar
+              categoriesLoading={categoriesLoading}
+              categoriesError={categoriesError}
+              gamesLoading={gamesLoading}
+              gamesError={gamesError}
+              categories={categories}
+              games={games}
+            />
           </div>
         )}
         <div className="height">
-          <Sidebar categories={categories} games={games} />
+          <Sidebar
+            categoriesLoading={categoriesLoading}
+            categoriesError={categoriesError}
+            gamesLoading={gamesLoading}
+            gamesError={gamesError}
+            categories={categories}
+            games={games}
+          />
           <div className="content-wrapper">
             <ClassCarousel />
             <Switch>

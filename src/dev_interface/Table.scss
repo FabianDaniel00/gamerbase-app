@@ -18,3 +18,11 @@
 .remove {
   text-align: center;
 }
+
+#like-button {
+  cursor: pointer;
+  color: #03cffc;
+  &:hover {
+    color: #009dbf;
+  }
+}

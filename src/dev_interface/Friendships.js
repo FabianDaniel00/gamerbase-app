@@ -163,7 +163,7 @@ const ContentTable = (props) => {
 
   const IsAccepted = (props) => {
     const { status, friendshipID } = props;
-    if (status === true) {
+    if (status) {
       return <td className="column">Accepted</td>;
     } else {
       return (

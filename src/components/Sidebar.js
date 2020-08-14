@@ -47,7 +47,14 @@ class SideNav extends Component {
     this.setState({ activePath: path });
   };
   render() {
-    const { categories, games } = this.props;
+    const {
+      categoriesLoading,
+      categoriesError,
+      gamesLoading,
+      gamesError,
+      categories,
+      games,
+    } = this.props;
     const { items, activePath } = this.state;
     return (
       <>
@@ -57,6 +64,10 @@ class SideNav extends Component {
             if (item.isDropdown) {
               return (
                 <CustomNavItem
+                  categoriesLoading={categoriesLoading}
+                  categoriesError={categoriesError}
+                  gamesLoading={gamesLoading}
+                  gamesError={gamesError}
                   categories={categories}
                   games={games}
                   key={item.key}
@@ -120,10 +131,24 @@ class NavItem extends Component {
 
 class CustomNavItem extends Component {
   render() {
-    const { categories, games } = this.props;
+    const {
+      categoriesLoading,
+      categoriesError,
+      gamesLoading,
+      gamesError,
+      categories,
+      games,
+    } = this.props;
     return (
       <StyledNavItem>
-        <CustomDropdownButton categories={categories} games={games} />
+        <CustomDropdownButton
+          categoriesLoading={categoriesLoading}
+          categoriesError={categoriesError}
+          gamesLoading={gamesLoading}
+          gamesError={gamesError}
+          categories={categories}
+          games={games}
+        />
       </StyledNavItem>
     );
   }
@@ -167,7 +192,14 @@ const CustomMenu = React.forwardRef(
 
 class CustomDropdownButton extends Component {
   render() {
-    const { categories, games } = this.props;
+    const {
+      categoriesLoading,
+      categoriesError,
+      gamesLoading,
+      gamesError,
+      categories,
+      games,
+    } = this.props;
     return (
       <Dropdown drop="right">
         <Dropdown.Toggle as={CustomToggle} id="dropdown-custom-components">
@@ -176,6 +208,8 @@ class CustomDropdownButton extends Component {
           </i>
         </Dropdown.Toggle>
         <Dropdown.Menu as={CustomMenu}>
+          {categoriesLoading && <Dropdown>Loading...</Dropdown>}
+          {categoriesError && <Dropdown>{categoriesError}</Dropdown>}
           {categories.map((category, key) => {
             return (
               <Dropdown
@@ -199,6 +233,8 @@ class CustomDropdownButton extends Component {
                 />
 
                 <Dropdown.Menu>
+                  {gamesLoading && <Dropdown.Item>Loading...</Dropdown.Item>}
+                  {gamesError && <Dropdown.Item>{gamesError}</Dropdown.Item>}
                   {games
                     .filter((game) => game.category.name === category.name)
                     .map((filteredGame, key) => {
@@ -226,7 +262,23 @@ class CustomDropdownButton extends Component {
 
 export default class Sidebar extends Component {
   render() {
-    const { categories, games } = this.props;
-    return <RouterSideNav categories={categories} games={games} />;
+    const {
+      categoriesLoading,
+      categoriesError,
+      gamesLoading,
+      gamesError,
+      categories,
+      games,
+    } = this.props;
+    return (
+      <RouterSideNav
+        categoriesLoading={categoriesLoading}
+        categoriesError={categoriesError}
+        gamesLoading={gamesLoading}
+        gamesError={gamesError}
+        categories={categories}
+        games={games}
+      />
+    );
   }
 }
