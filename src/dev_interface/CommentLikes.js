@@ -195,7 +195,7 @@ export const CommentLikes = () => {
   } = useQuery(USERS);
 
   useEffect(() => {
-    if (likesData) setLikes(likesData.allPostLikes.postLikes);
+    if (likesData) setLikes(likesData.allCommentLikes.commentLikes);
     if (commentsData) setPosts(commentsData.allComments.comments);
     if (usersData) setUsers(usersData.allUsers.users);
   }, [likesData, commentsData, usersData]);

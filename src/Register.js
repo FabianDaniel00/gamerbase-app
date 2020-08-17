@@ -41,6 +41,10 @@ export const Register = (props) => {
       className="form-wrapper"
       onSubmit={(event) => handleSubmit(event.preventDefault())}
     >
+      <div className="title-div">
+        <Form.Label className="title">Register</Form.Label>
+      </div>
+
       <Form.Group controlId="formHorizontalUsername">
         <Form.Label column>Username</Form.Label>
         <Col>

@@ -1,30 +1,56 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Form, Col, Button, Alert } from "react-bootstrap";
-import { gql } from "@apollo/client";
+import { gql, useMutation } from "@apollo/client";
 import "./Form.scss";
 
-export const Login = (props) => {
+const LOGIN = gql`
+  mutation($userName: String!, $password: String!) {
+    login(userName: $userName, password: $password)
+  }
+`;
+
+export const Login = () => {
   const [username, setUsername] = useState(String);
   const [password, setPassword] = useState(String);
-  const [loginErrors, setLoginErrors] = useState(String);
+  const [showResponse, setShowResponse] = useState(Boolean);
+  const [response, setResponse] = useState(String);
+  const [isLogged, setIsLogged] = useState(Boolean);
+  const [token, setToken] = useState(Boolean);
 
-  const { client } = props;
+  const [login, { loading, error }] = useMutation(LOGIN);
+
+  function loginError(error) {
+    setIsLogged(false);
+    setResponse(`The login was unsuccessful! ${error}`);
+    setShowResponse(true);
+  }
+
+  useEffect(() => {
+    console.log(`token: ${token}`);
+    localStorage.setItem("token", JSON.stringify({
+      isLogged: isLogged,
+      token: token
+    }));
+    setResponse("The login was successful!");
+    setShowResponse(true);;
+  }, [isLogged, token])
+
+  const successLogin = (token) => {
+    setIsLogged(true);
+    setToken(token);
+  };
 
   function handleSubmit() {
-    client
-      .utation({
-        mutation: gql`
-            {
-              // mutation
-            }
-          `,
-      })
-      .then((response) => {
-        console.log("response from login: ", response);
-      })
-      .catch((error) => {
-        console.log("login error: ", error);
-      });
+    login({
+      variables: { userName: username, password: password },
+    })
+      .then((token) => successLogin(token.data.login))
+      .catch((error) => loginError(error.message));
+
+    if (error) {
+      loginError(error.message);
+    }
+    setShowResponse(false);
   }
 
   return (
@@ -32,11 +58,18 @@ export const Login = (props) => {
       className="form-wrapper"
       onSubmit={(event) => handleSubmit(event.preventDefault())}
     >
+      <div className="title-div">
+        <Form.Label className="title">Login</Form.Label>
+      </div>
+
       <Form.Group controlId="formHorizontalUsername">
         <Form.Label column>Username</Form.Label>
         <Col>
           <Form.Control
-            onChange={(event) => setUsername(event.target.value)}
+            onChange={(event) => {
+              setUsername(event.target.value);
+              setShowResponse(false);
+            }}
             type="text"
             value={username}
             placeholder="Username"
@@ -49,7 +82,10 @@ export const Login = (props) => {
         <Form.Label column>Password</Form.Label>
         <Col>
           <Form.Control
-            onChange={(event) => setPassword(event.target.value)}
+            onChange={(event) => {
+              setPassword(event.target.value);
+              setShowResponse(false);
+            }}
             type="password"
             value={password}
             placeholder="Password"
@@ -76,12 +112,31 @@ export const Login = (props) => {
           <Alert.Link href="/signup"> click here</Alert.Link> to create.
         </Col>
       </Form.Group>
+      <Form.Group>
+        <Col>
+          <Button type="submit" block>
+            Login
+          </Button>
+        </Col>
+      </Form.Group>
 
-      <Col>
-        <Button type="submit" block>
-          Login
-        </Button>
-      </Col>
+      {loading && (
+        <Form.Group>
+          <Col>
+            <Alert className="text-center" variant="info">
+              <i className="fas fa-spinner fa-spin" />
+            </Alert>
+          </Col>
+        </Form.Group>
+      )}
+
+      {showResponse && (
+        <Form.Group>
+          <Col>
+            <Alert variant="danger">{response}</Alert>
+          </Col>
+        </Form.Group>
+      )}
     </Form>
   );
 };
