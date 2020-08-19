@@ -1,4 +1,4 @@
-import React, { useState, useLayoutEffect } from "react";
+import React, { useState, useLayoutEffect, useEffect } from "react";
 import "./App.scss";
 import DevInterface from "./dev_interface/DevInterface";
 import Headroom from "react-headroom";
@@ -11,7 +11,12 @@ import { Register } from "./Register";
 import { Home } from "./Home";
 import { About } from "./About";
 import { NoMatch } from "./NoMatch";
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Route,
+  Switch,
+  Redirect,
+} from "react-router-dom";
 import {
   ApolloClient,
   InMemoryCache,
@@ -31,6 +36,7 @@ const App = () => {
   const [games, setGames] = useState([]);
   const [gamesLoading, setGamesLoading] = useState(true);
   const [gamesError, setGamesError] = useState(String);
+  const [redirect, setRedirect] = useState(Boolean);
 
   client
     .query({
@@ -96,6 +102,17 @@ const App = () => {
     return size;
   };
 
+  const LoginRedirect = () => {
+    setRedirect(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      setRedirect(false);
+      return <Redirect to="/home" />;
+    };
+  }, [redirect]);
+
   return (
     <ApolloProvider client={client}>
       <Router>
@@ -137,9 +154,30 @@ const App = () => {
           <div className="content-wrapper">
             <ClassCarousel />
             <Switch>
-              <Route exact path="/" component={Home} />
-              <Route path="/login" component={Login} />
-              <Route path="/signup" component={Register} />
+              <Route exact path="/home">
+                {localStorage.getItem("token") &&
+                JSON.parse(localStorage.getItem("token")).isLogged ? (
+                  <Home />
+                ) : (
+                  <Redirect to="/login" />
+                )}
+              </Route>
+              <Route path="/signup">
+                {localStorage.getItem("token") &&
+                JSON.parse(localStorage.getItem("token")).isLogged ? (
+                  <Redirect to="/home" />
+                ) : (
+                  <Register />
+                )}
+              </Route>
+              <Route path="/login">
+                {localStorage.getItem("token") &&
+                JSON.parse(localStorage.getItem("token")).isLogged ? (
+                  <Redirect to="/home" />
+                ) : (
+                  <Login loginRedirect={LoginRedirect} />
+                )}
+              </Route>
               <Route path="/about" component={About} />
               <Route path="/dev-interface" component={DevInterface} />
               <Route component={NoMatch} />

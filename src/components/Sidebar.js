@@ -12,7 +12,7 @@ class SideNav extends Component {
       items: [
         {
           path:
-            "/" /* path is used as id to check which NavItem is active basically */,
+            "/home" /* path is used as id to check which NavItem is active basically */,
           name: "Home",
           css: "fa fa-home",
           key: 1 /* Key is required, else console throws error. Does this please you Mr. Browser?! */,
@@ -30,14 +30,14 @@ class SideNav extends Component {
           key: 3,
         },
         {
+          key: 5,
+          isDropdown: true,
+        },
+        {
           path: "/about",
           name: "About",
           css: "fa fa-address-card",
           key: 4,
-        },
-        {
-          key: 5,
-          isDropdown: true,
         },
       ],
     };
@@ -60,34 +60,72 @@ class SideNav extends Component {
       <>
         <div className="sidenavbar" />
         <div className="sticky-top sidenav">
-          {items.map((item) => {
-            if (item.isDropdown) {
-              return (
-                <CustomNavItem
-                  categoriesLoading={categoriesLoading}
-                  categoriesError={categoriesError}
-                  gamesLoading={gamesLoading}
-                  gamesError={gamesError}
-                  categories={categories}
-                  games={games}
-                  key={item.key}
-                />
-              );
-            } else {
-              return (
-                <NavItem
-                  path={item.path}
-                  name={item.name}
-                  css={item.css}
-                  onItemClick={
-                    this.onItemClick
-                  } /* Simply passed an entire function to onClick prop */
-                  active={item.path === activePath}
-                  key={item.key}
-                />
-              );
-            }
-          })}
+          {localStorage.getItem("token") &&
+          JSON.parse(localStorage.getItem("token")).isLogged
+            ? items
+                .filter(
+                  (filteredItem) =>
+                    filteredItem.name !== "Login" &&
+                    filteredItem.name !== "Sign up"
+                )
+                .map((item) => {
+                  if (item.isDropdown) {
+                    return (
+                      <CustomNavItem
+                        categoriesLoading={categoriesLoading}
+                        categoriesError={categoriesError}
+                        gamesLoading={gamesLoading}
+                        gamesError={gamesError}
+                        categories={categories}
+                        games={games}
+                        key={item.key}
+                      />
+                    );
+                  } else {
+                    return (
+                      <NavItem
+                        path={item.path}
+                        name={item.name}
+                        css={item.css}
+                        onItemClick={
+                          this.onItemClick
+                        } /* Simply passed an entire function to onClick prop */
+                        active={item.path === activePath}
+                        key={item.key}
+                      />
+                    );
+                  }
+                })
+            : items
+                .filter((filteredItem) => filteredItem.name !== "Home")
+                .map((item) => {
+                  if (item.isDropdown) {
+                    return (
+                      <CustomNavItem
+                        categoriesLoading={categoriesLoading}
+                        categoriesError={categoriesError}
+                        gamesLoading={gamesLoading}
+                        gamesError={gamesError}
+                        categories={categories}
+                        games={games}
+                        key={item.key}
+                      />
+                    );
+                  } else {
+                    return (
+                      <NavItem
+                        path={item.path}
+                        name={item.name}
+                        css={item.css}
+                        onItemClick={
+                          this.onItemClick
+                        } /* Simply passed an entire function to onClick prop */
+                        active={item.path === activePath}
+                        key={item.key}
+                      />
+                    );
+                  }
+                })}
         </div>
       </>
     );

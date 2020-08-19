@@ -165,11 +165,20 @@ class NavigationBar extends Component {
               </NavDropdown>
             </Nav>
             <Nav>
-              <Nav.Link href="/">Home</Nav.Link>
-              <Nav.Link href="/login">Login</Nav.Link>
-              <Nav.Link href="/signup">Sign up</Nav.Link>
-              <Nav.Link href="/about">About</Nav.Link>
-              <CustomDropdownButton />
+              {localStorage.getItem("token") &&
+              JSON.parse(localStorage.getItem("token")).isLogged ? (
+                <>
+                  <Nav.Link href="/home">Home</Nav.Link>
+                  <Nav.Link href="/about">About</Nav.Link>
+                  <CustomDropdownButton />
+                </>
+              ) : (
+                <>
+                  <Nav.Link href="/login">Login</Nav.Link>
+                  <Nav.Link href="/signup">Sign up</Nav.Link>
+                  <Nav.Link href="/about">About</Nav.Link>
+                </>
+              )}
             </Nav>
           </Navbar.Collapse>
           <Form className="form-center">
@@ -219,6 +228,10 @@ const CustomMenu = React.forwardRef(
   }
 );
 
+const Logout = () => {
+  localStorage.clear();
+};
+
 class CustomDropdownButton extends Component {
   render() {
     return (
@@ -237,7 +250,12 @@ class CustomDropdownButton extends Component {
             Settings
           </Dropdown.Item>
           <Dropdown.Divider />
-          <Dropdown.Item className="operator-menu" key="3" href="/action/3.3">
+          <Dropdown.Item
+            className="operator-menu"
+            key="3"
+            onClick={Logout}
+            href="/login"
+          >
             Log out
           </Dropdown.Item>
         </Dropdown.Menu>

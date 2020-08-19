@@ -161,6 +161,12 @@ const ContentTable = (props) => {
       </thead>
       <tbody>
         {usersData.map((user, key) => {
+          let userRoomName;
+          try {
+            userRoomName = user.room.name;
+          } catch (error_) {
+            userRoomName = "null";
+          }
           return (
             <tr
               onClick={() => tableClick(user.userName, user.email, user.id)}
@@ -169,9 +175,13 @@ const ContentTable = (props) => {
               <td className="column">{user.id}</td>
               <td className="column">{user.userName}</td>
               <td className="column">{user.email}</td>
-              <td className="column">{user.stats}</td>
-              <td className="column">{user.room}</td>
-              <td className="column">{user.email}</td>
+              {user.stats === null ? (
+                <td className="column">null</td>
+              ) : (
+                <td className="column">{user.stats}</td>
+              )}
+              <td className="column">{userRoomName}</td>
+              <td className="column">{user.slug}</td>
               <td className="text-center">
                 <Button
                   variant="outline-primary"

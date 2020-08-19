@@ -9,35 +9,46 @@ const LOGIN = gql`
   }
 `;
 
-export const Login = () => {
+export const Login = ({ loginRedirect }) => {
   const [username, setUsername] = useState(String);
   const [password, setPassword] = useState(String);
   const [showResponse, setShowResponse] = useState(Boolean);
   const [response, setResponse] = useState(String);
   const [isLogged, setIsLogged] = useState(Boolean);
-  const [token, setToken] = useState(Boolean);
+  const [token, setToken] = useState(String);
 
   const [login, { loading, error }] = useMutation(LOGIN);
 
   function loginError(error) {
+    localStorage.clear();
     setIsLogged(false);
+    setToken("");
     setResponse(`The login was unsuccessful! ${error}`);
     setShowResponse(true);
   }
 
   useEffect(() => {
-    console.log(`token: ${token}`);
-    localStorage.setItem("token", JSON.stringify({
-      isLogged: isLogged,
-      token: token
-    }));
-    setResponse("The login was successful!");
-    setShowResponse(true);;
-  }, [isLogged, token])
+    if (
+      !(
+        localStorage.getItem("token") &&
+        JSON.parse(localStorage.getItem("token")).isLogged &&
+        JSON.parse(localStorage.getItem("token")).token
+      )
+    ) {
+      localStorage.setItem(
+        "token",
+        JSON.stringify({
+          isLogged: isLogged,
+          token: token,
+        })
+      );
+    }
+  }, [isLogged, token]);
 
   const successLogin = (token) => {
     setIsLogged(true);
     setToken(token);
+    loginRedirect();
   };
 
   function handleSubmit() {
@@ -108,8 +119,8 @@ export const Login = () => {
 
       <Form.Group>
         <Col>
-          If you don't have an account,
-          <Alert.Link href="/signup"> click here</Alert.Link> to create.
+          If you don't have an account,&nbsp;
+          <Alert.Link href="/signup">click here</Alert.Link> to create.
         </Col>
       </Form.Group>
       <Form.Group>
