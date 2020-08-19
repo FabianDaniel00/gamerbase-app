@@ -168,7 +168,7 @@ class NavigationBar extends Component {
               {localStorage.getItem("token") &&
               JSON.parse(localStorage.getItem("token")).isLogged ? (
                 <>
-                  <Nav.Link href="/home">Home</Nav.Link>
+                  <Nav.Link href="/">Home</Nav.Link>
                   <Nav.Link href="/about">About</Nav.Link>
                   <CustomDropdownButton />
                 </>

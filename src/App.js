@@ -37,6 +37,7 @@ const App = () => {
   const [gamesLoading, setGamesLoading] = useState(true);
   const [gamesError, setGamesError] = useState(String);
   const [redirect, setRedirect] = useState(Boolean);
+  const [userData, setUserData] = useState({});
 
   client
     .query({
@@ -102,16 +103,20 @@ const App = () => {
     return size;
   };
 
-  const LoginRedirect = () => {
+  const redirectToHome = () => {
     setRedirect(true);
   };
 
   useEffect(() => {
     return () => {
       setRedirect(false);
-      return <Redirect to="/home" />;
+      return <Redirect to="/" />;
     };
   }, [redirect]);
+
+  function getUserData(user_data) {
+    setUserData(user_data);
+  }
 
   return (
     <ApolloProvider client={client}>
@@ -154,32 +159,46 @@ const App = () => {
           <div className="content-wrapper">
             <ClassCarousel />
             <Switch>
-              <Route exact path="/home">
+              <Route exact path="/">
                 {localStorage.getItem("token") &&
                 JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <Home />
+                  <Home userData={userData} />
                 ) : (
                   <Redirect to="/login" />
                 )}
               </Route>
+
               <Route path="/signup">
                 {localStorage.getItem("token") &&
                 JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <Redirect to="/home" />
+                  <Redirect to="/" />
                 ) : (
                   <Register />
                 )}
               </Route>
+
               <Route path="/login">
                 {localStorage.getItem("token") &&
                 JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <Redirect to="/home" />
+                  <Redirect to="/" />
                 ) : (
-                  <Login loginRedirect={LoginRedirect} />
+                  <Login
+                    redirectToHome={redirectToHome}
+                    getUserData={getUserData}
+                  />
                 )}
               </Route>
+
               <Route path="/about" component={About} />
-              <Route path="/dev-interface" component={DevInterface} />
+              <Route path="/dev-interface">
+                {localStorage.getItem("token") &&
+                JSON.parse(localStorage.getItem("token")).isLogged ? (
+                  <DevInterface />
+                ) : (
+                  <Redirect to="/login" />
+                )}
+              </Route>
+
               <Route component={NoMatch} />
             </Switch>
           </div>

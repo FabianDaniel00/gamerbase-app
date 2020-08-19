@@ -57,6 +57,7 @@ const COMMENTS = gql`
           title
         }
         content
+        likes
       }
     }
   }
@@ -105,6 +106,7 @@ const ContentTable = (props) => {
             <th>Poster</th>
             <th>Post Title</th>
             <th>Content</th>
+            <th>Likes</th>
             <th className="text-center">Remove</th>
           </tr>
         </thead>
@@ -140,6 +142,7 @@ const ContentTable = (props) => {
             <th>Poster</th>
             <th>Post Title</th>
             <th>Content</th>
+            <th>Likes</th>
             <th className="text-center">Remove</th>
           </tr>
         </thead>
@@ -167,6 +170,7 @@ const ContentTable = (props) => {
           <th>Poster</th>
           <th>Post Title</th>
           <th>Content</th>
+          <th>Likes</th>
           <th className="text-center">Remove</th>
         </tr>
       </thead>
@@ -188,6 +192,7 @@ const ContentTable = (props) => {
               <td className="column">{comment.poster.userName}</td>
               <td className="column">{comment.post.title}</td>
               <td className="column">{comment.content}</td>
+              <td className="column">{comment.likes}</td>
               <td className="text-center">
                 <Button
                   variant="outline-primary"

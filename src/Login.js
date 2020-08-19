@@ -9,7 +9,7 @@ const LOGIN = gql`
   }
 `;
 
-export const Login = ({ loginRedirect }) => {
+export const Login = ({ redirectToHome, getUserData }) => {
   const [username, setUsername] = useState(String);
   const [password, setPassword] = useState(String);
   const [showResponse, setShowResponse] = useState(Boolean);
@@ -28,13 +28,7 @@ export const Login = ({ loginRedirect }) => {
   }
 
   useEffect(() => {
-    if (
-      !(
-        localStorage.getItem("token") &&
-        JSON.parse(localStorage.getItem("token")).isLogged &&
-        JSON.parse(localStorage.getItem("token")).token
-      )
-    ) {
+    if (isLogged && token) {
       localStorage.setItem(
         "token",
         JSON.stringify({
@@ -45,11 +39,32 @@ export const Login = ({ loginRedirect }) => {
     }
   }, [isLogged, token]);
 
-  const successLogin = (token) => {
+  function successLogin(token_) {
     setIsLogged(true);
-    setToken(token);
-    loginRedirect();
-  };
+    setToken(token_);
+    redirectToHome();
+
+    require("es6-promise").polyfill();
+    require("isomorphic-fetch");
+
+    fetch("http://localhost", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token_}`,
+      },
+
+      body: JSON.stringify({ query: "{userFromToken{id, userName}}" }),
+    })
+      .then((response) => {
+        response.json().then((result) => {
+          getUserData(result.data.userFromToken);
+        });
+      })
+      .catch((error) => {
+        loginError(error.message);
+      });
+  }
 
   function handleSubmit() {
     login({

@@ -6,7 +6,7 @@ import "./Table.scss";
 
 const COMMENT_LIKE = gql`
   mutation($likerID: Int!, $commentID: Int!) {
-    CommentLike(postLike: { liker: $likerID, comment: $commentID }) {
+    CommentLike(commentLike: { liker: $likerID, comment: $commentID }) {
       id
     }
   }
@@ -233,7 +233,7 @@ export const CommentLikes = () => {
     commentLike({
       variables: {
         likerID: likerID,
-        postID: commentID,
+        commentID: commentID,
       },
       refetchQueries: [{ query: LIKES }],
     })
@@ -342,7 +342,7 @@ export const CommentLikes = () => {
         likesData={likes}
         commentLike={commentLike}
         successLike={successLike}
-        errorUpdate={errorLike_}
+        errorLike={errorLike_}
         setShowResponse={setShowResponse}
         tableClick={tableClick}
       />

@@ -12,7 +12,7 @@ class SideNav extends Component {
       items: [
         {
           path:
-            "/home" /* path is used as id to check which NavItem is active basically */,
+            "/" /* path is used as id to check which NavItem is active basically */,
           name: "Home",
           css: "fa fa-home",
           key: 1 /* Key is required, else console throws error. Does this please you Mr. Browser?! */,
