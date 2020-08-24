@@ -127,6 +127,9 @@ const ContentTable = (props) => {
             <td className="text-center">
               <i className="fas fa-spinner fa-spin" />
             </td>
+            <td className="text-center">
+              <i className="fas fa-spinner fa-spin" />
+            </td>
           </tr>
         </tbody>
       </Table>

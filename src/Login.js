@@ -9,7 +9,7 @@ const LOGIN = gql`
   }
 `;
 
-export const Login = ({ redirectToHome, getUserData }) => {
+export const Login = ({ redirectToHome }) => {
   const [username, setUsername] = useState(String);
   const [password, setPassword] = useState(String);
   const [showResponse, setShowResponse] = useState(Boolean);
@@ -43,27 +43,6 @@ export const Login = ({ redirectToHome, getUserData }) => {
     setIsLogged(true);
     setToken(token_);
     redirectToHome();
-
-    require("es6-promise").polyfill();
-    require("isomorphic-fetch");
-
-    fetch("http://localhost", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token_}`,
-      },
-
-      body: JSON.stringify({ query: "{userFromToken{id, userName}}" }),
-    })
-      .then((response) => {
-        response.json().then((result) => {
-          getUserData(result.data.userFromToken);
-        });
-      })
-      .catch((error) => {
-        loginError(error.message);
-      });
   }
 
   function handleSubmit() {

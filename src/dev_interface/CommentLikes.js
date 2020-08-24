@@ -173,7 +173,7 @@ export const CommentLikes = () => {
   const [likerID, setLikerID] = useState(String);
   const [commentID, setCommentID] = useState(String);
   const [likes, setLikes] = useState([]);
-  const [posts, setPosts] = useState([]);
+  const [comments, setComments] = useState([]);
   const [users, setUsers] = useState([]);
 
   const {
@@ -196,7 +196,7 @@ export const CommentLikes = () => {
 
   useEffect(() => {
     if (likesData) setLikes(likesData.allCommentLikes.commentLikes);
-    if (commentsData) setPosts(commentsData.allComments.comments);
+    if (commentsData) setComments(commentsData.allComments.comments);
     if (usersData) setUsers(usersData.allUsers.users);
   }, [likesData, commentsData, usersData]);
 
@@ -298,10 +298,10 @@ export const CommentLikes = () => {
               {commentsLoading && <option>Loading...</option>}
               {commentsError && <option>Error! {commentsError.message}</option>}
               {commentsData && <option value="">Choose one comment...</option>}
-              {posts.map((post, key) => {
+              {comments.map((comment, key) => {
                 return (
-                  <option key={key} value={post.id}>
-                    {post.title}
+                  <option key={key} value={comment.id}>
+                    ID: {comment.id}
                   </option>
                 );
               })}

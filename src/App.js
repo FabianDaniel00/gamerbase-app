@@ -114,9 +114,37 @@ const App = () => {
     };
   }, [redirect]);
 
-  function getUserData(user_data) {
-    setUserData(user_data);
-  }
+  useEffect(() => {
+    if (
+      localStorage.getItem("token") &&
+      JSON.parse(localStorage.getItem("token")).token
+    ) {
+      require("es6-promise").polyfill();
+      require("isomorphic-fetch");
+
+      fetch("http://localhost", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${
+            JSON.parse(localStorage.getItem("token")).token
+          }`,
+        },
+        body: JSON.stringify({ query: "{userFromToken{id, userName}}" }),
+      })
+        .then((response) => {
+          response.json().then((result) => {
+            setUserData(result.data.userFromToken);
+          });
+        })
+        .catch((error) => {
+          setUserData({
+            userName: <i style="color: red">[{error.message}]</i>,
+            id: <i style="color: red">[{error.message}]</i>,
+          });
+        });
+    }
+  }, [redirect]);
 
   return (
     <ApolloProvider client={client}>
@@ -131,6 +159,7 @@ const App = () => {
                 gamesError={gamesError}
                 categories={categories}
                 games={games}
+                userData={userData}
               />
             </div>
           </Headroom>
@@ -144,6 +173,7 @@ const App = () => {
               gamesError={gamesError}
               categories={categories}
               games={games}
+              userData={userData}
             />
           </div>
         )}
@@ -155,6 +185,7 @@ const App = () => {
             gamesError={gamesError}
             categories={categories}
             games={games}
+            redirectToHome={redirectToHome}
           />
           <div className="content-wrapper">
             <ClassCarousel />
@@ -162,7 +193,7 @@ const App = () => {
               <Route exact path="/">
                 {localStorage.getItem("token") &&
                 JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <Home userData={userData} />
+                  <>{userData.id && <Home userID={parseInt(userData.id)} />}</>
                 ) : (
                   <Redirect to="/login" />
                 )}
@@ -182,10 +213,7 @@ const App = () => {
                 JSON.parse(localStorage.getItem("token")).isLogged ? (
                   <Redirect to="/" />
                 ) : (
-                  <Login
-                    redirectToHome={redirectToHome}
-                    getUserData={getUserData}
-                  />
+                  <Login redirectToHome={redirectToHome} />
                 )}
               </Route>
 

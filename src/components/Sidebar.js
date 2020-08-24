@@ -30,21 +30,32 @@ class SideNav extends Component {
           key: 3,
         },
         {
-          key: 5,
+          key: 4,
           isDropdown: true,
         },
         {
           path: "/about",
           name: "About",
           css: "fa fa-address-card",
-          key: 4,
+          key: 5,
+        },
+        {
+          path: "/login",
+          name: "Logout",
+          css: "fa fa-sign-out-alt",
+          key: 6,
         },
       ],
     };
   }
 
-  onItemClick = (path) => {
+  onItemClick = (path, name) => {
     this.setState({ activePath: path });
+    if (name === "Logout") {
+      localStorage.clear();
+      this.props.redirectToHome();
+      this.setState({ activePath: "/" });
+    }
   };
   render() {
     const {
@@ -97,7 +108,11 @@ class SideNav extends Component {
                   }
                 })
             : items
-                .filter((filteredItem) => filteredItem.name !== "Home")
+                .filter(
+                  (filteredItem) =>
+                    filteredItem.name !== "Home" &&
+                    filteredItem.name !== "Logout"
+                )
                 .map((item) => {
                   if (item.isDropdown) {
                     return (
@@ -151,8 +166,8 @@ const StyledNavItem = styled.div`
 
 class NavItem extends Component {
   handleClick = () => {
-    const { path, onItemClick } = this.props;
-    onItemClick(path);
+    const { path, onItemClick, name } = this.props;
+    onItemClick(path, name);
   };
 
   render() {
@@ -307,6 +322,7 @@ export default class Sidebar extends Component {
       gamesError,
       categories,
       games,
+      redirectToHome,
     } = this.props;
     return (
       <RouterSideNav
@@ -316,6 +332,7 @@ export default class Sidebar extends Component {
         gamesError={gamesError}
         categories={categories}
         games={games}
+        redirectToHome={redirectToHome}
       />
     );
   }

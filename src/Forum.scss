@@ -1,0 +1,48 @@
+p {
+  margin: 0;
+}
+
+.hole-post {
+  background-color: #666666;
+  padding: 2%;
+  position: relative;
+  margin-bottom: 20px;
+  border-radius: 10px;
+}
+
+.post {
+  background-color: #4d4d4d;
+  padding: 2%;
+  border-radius: 5px 5px 0 0;
+  border-bottom: 7px double #9fffcb;
+}
+
+.comments {
+  background-color: #999999;
+  padding: 10px 0 20px 0;
+  border-radius: 0 0 5px 5px;
+}
+
+.comment {
+  background-color: #737373;
+  padding: 5px 5% 5px 5%;
+  margin-top: 10px;
+  border-left: 10px solid #4dff9d;
+}
+
+.comment-count {
+  float: left;
+}
+
+.comment-likes,
+.post-likes {
+  text-align: right;
+}
+
+.likes {
+  color: #9fffcb;
+  &:hover {
+    opacity: 70%;
+    cursor: pointer;
+  }
+}

@@ -1,13 +1,13 @@
 import React from "react";
+import { Forum } from "./Forum";
 import "./Home.scss";
 
 export const Home = (props) => {
-  const { userData } = props;
+  const { userID } = props;
   return (
     <div className="home">
-      <h1 className="title">Home Page</h1>
-      <h2 className="title">username: {userData.userName}</h2>
-      <h2 className="title">id: {userData.id}</h2>
+      <h1 className="title">Forum</h1>
+      <Forum userID={userID} />
     </div>
   );
 };
