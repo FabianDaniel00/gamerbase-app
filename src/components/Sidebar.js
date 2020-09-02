@@ -50,13 +50,25 @@ class SideNav extends Component {
   }
 
   onItemClick = (path, name) => {
-    this.setState({ activePath: path });
     if (name === "Logout") {
       localStorage.clear();
-      this.props.redirectToHome();
-      this.setState({ activePath: "/" });
+      this.props.redirectToLogin();
+      this.setState({ activePath: "/login" });
+    } else {
+      this.setState({ activePath: path });
     }
   };
+
+  componentDidUpdate() {
+    if (
+      localStorage.getItem("token") &&
+      JSON.parse(localStorage.getItem("token")).isLogged &&
+      this.state.activePath === "/login"
+    ) {
+      this.setState({ activePath: "/" });
+    }
+  }
+
   render() {
     const {
       categoriesLoading,
@@ -322,7 +334,7 @@ export default class Sidebar extends Component {
       gamesError,
       categories,
       games,
-      redirectToHome,
+      redirectToLogin,
     } = this.props;
     return (
       <RouterSideNav
@@ -332,7 +344,7 @@ export default class Sidebar extends Component {
         gamesError={gamesError}
         categories={categories}
         games={games}
-        redirectToHome={redirectToHome}
+        redirectToLogin={redirectToLogin}
       />
     );
   }

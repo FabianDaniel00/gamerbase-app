@@ -36,7 +36,8 @@ const App = () => {
   const [games, setGames] = useState([]);
   const [gamesLoading, setGamesLoading] = useState(true);
   const [gamesError, setGamesError] = useState(String);
-  const [redirect, setRedirect] = useState(Boolean);
+  const [redirectToHome_, setRedirectToHome_] = useState(Boolean);
+  const [redirectToLogin_, setRedirectToLogin_] = useState(Boolean);
   const [userData, setUserData] = useState({});
 
   client
@@ -104,15 +105,26 @@ const App = () => {
   };
 
   const redirectToHome = () => {
-    setRedirect(true);
+    setRedirectToHome_(true);
   };
 
   useEffect(() => {
     return () => {
-      setRedirect(false);
+      setRedirectToHome_(false);
       return <Redirect to="/" />;
     };
-  }, [redirect]);
+  }, [redirectToHome_]);
+
+  const redirectToLogin = () => {
+    setRedirectToLogin_(true);
+  };
+
+  useEffect(() => {
+    return () => {
+      setRedirectToLogin_(false);
+      return <Redirect to="/login" />;
+    };
+  }, [redirectToLogin_]);
 
   useEffect(() => {
     if (
@@ -139,12 +151,12 @@ const App = () => {
         })
         .catch((error) => {
           setUserData({
-            userName: <i style="color: red">[{error.message}]</i>,
-            id: <i style="color: red">[{error.message}]</i>,
+            userName: <i className="error">[{error.message}]</i>,
+            id: <i className="error">[{error.message}]</i>,
           });
         });
     }
-  }, [redirect]);
+  }, [redirectToHome_]);
 
   return (
     <ApolloProvider client={client}>
@@ -185,7 +197,7 @@ const App = () => {
             gamesError={gamesError}
             categories={categories}
             games={games}
-            redirectToHome={redirectToHome}
+            redirectToLogin={redirectToLogin}
           />
           <div className="content-wrapper">
             <ClassCarousel />
