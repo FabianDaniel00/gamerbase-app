@@ -26,7 +26,8 @@ p {
   overflow: auto;
 }
 
-.posts-loading {
+.posts-loading,
+.comments-loading {
   text-align: center;
 }
 
@@ -188,4 +189,44 @@ p {
 
 .commentslabel {
   color: #b3b3b3;
+}
+
+.load-more-post {
+  color: #b3b3b3;
+  width: 100px;
+  text-align: center;
+  margin: 0 auto 10px auto;
+  &:hover {
+    opacity: 70%;
+    cursor: pointer;
+  }
+}
+
+.load-more-comment {
+  color: #cccccc;
+  width: 180px;
+  margin-top: 10px;
+  text-align: center;
+  margin: 0 auto 10px auto;
+  &:hover {
+    opacity: 70%;
+    cursor: pointer;
+  }
+}
+
+.loading {
+  color: #b3b3b3;
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.show-comments {
+  margin: 0 auto;
+  width: 130px;
+  text-align: center;
+  color: #d9d9d9;
+  &:hover {
+    opacity: 70%;
+    cursor: pointer;
+  }
 }

@@ -17,79 +17,58 @@ import {
   Switch,
   Redirect,
 } from "react-router-dom";
-import {
-  ApolloClient,
-  InMemoryCache,
-  ApolloProvider,
-  gql,
-} from "@apollo/client";
+import { useQuery, gql } from "@apollo/client";
 
-const client = new ApolloClient({
-  uri: "http://localhost",
-  cache: new InMemoryCache(),
-});
+const CATEGORIES = gql`
+  {
+    allCategories(limit: 0, page: 1) {
+      categories {
+        name
+        slug
+      }
+    }
+  }
+`;
+
+const GAMES = gql`
+  {
+    allGames(limit: 0, page: 1) {
+      games {
+        name
+        slug
+        category {
+          name
+        }
+      }
+    }
+  }
+`;
 
 const App = () => {
   const [categories, setCategories] = useState([]);
-  const [categoriesLoading, setCategoriesLoading] = useState(true);
-  const [categoriesError, setCategoriesError] = useState(String);
   const [games, setGames] = useState([]);
-  const [gamesLoading, setGamesLoading] = useState(true);
-  const [gamesError, setGamesError] = useState(String);
   const [redirectToHome_, setRedirectToHome_] = useState(Boolean);
   const [redirectToLogin_, setRedirectToLogin_] = useState(Boolean);
   const [userData, setUserData] = useState({});
 
-  client
-    .query({
-      query: gql`
-        {
-          allCategories(limit: 0, page: 1) {
-            categories {
-              name
-              slug
-            }
-          }
-        }
-      `,
-    })
-    .then(({ error, data }) => {
-      if (error) setCategoriesError(error.message);
-      if (data) {
-        setCategories(data.allCategories.categories);
-        setCategoriesLoading(false);
-      }
-    })
-    .catch((error) => {
-      setCategoriesError(error.message);
-    });
+  const {
+    loading: categoriesLoading,
+    error: categoriesError,
+    data: categoriesData,
+  } = useQuery(CATEGORIES);
 
-  client
-    .query({
-      query: gql`
-        {
-          allGames(limit: 0, page: 1) {
-            games {
-              name
-              slug
-              category {
-                name
-              }
-            }
-          }
-        }
-      `,
-    })
-    .then(({ error, data }) => {
-      if (error) setGamesError(error.message);
-      if (data) {
-        setGames(data.allGames.games);
-        setGamesLoading(false);
-      }
-    })
-    .catch((error) => {
-      setGamesError(error.message);
-    });
+  const {
+    loading: gamesLoading,
+    error: gamesError,
+    data: gamesData,
+  } = useQuery(GAMES);
+
+  useEffect(() => {
+    if (categoriesData && gamesData) {
+      setCategories(categoriesData.allCategories.categories);
+      setGames(gamesData.allGames.games);
+    }
+  }, [categoriesData, gamesData]);
 
   const useWindowSize = () => {
     const [size, setSize] = useState([0]);
@@ -126,7 +105,7 @@ const App = () => {
     };
   }, [redirectToLogin_]);
 
-  useEffect(() => {
+  function getUserData() {
     if (
       localStorage.getItem("token") &&
       JSON.parse(localStorage.getItem("token")).token
@@ -145,9 +124,15 @@ const App = () => {
         body: JSON.stringify({ query: "{userFromToken{id, userName}}" }),
       })
         .then((response) => {
-          response.json().then((result) => {
-            setUserData(result.data.userFromToken);
-          });
+          response
+            .json()
+            .then((result) => {
+              setUserData(result.data.userFromToken);
+            })
+            .catch(() => {
+              localStorage.clear();
+              setRedirectToLogin_(true);
+            });
         })
         .catch((error) => {
           setUserData({
@@ -156,27 +141,16 @@ const App = () => {
           });
         });
     }
+  }
+
+  useEffect(() => {
+    getUserData();
   }, [redirectToHome_]);
 
   return (
-    <ApolloProvider client={client}>
-      <Router>
-        {useWindowSize() <= 500 && (
-          <Headroom>
-            <div className="sticky-navbar">
-              <NavigationBar
-                categoriesLoading={categoriesLoading}
-                categoriesError={categoriesError}
-                gamesLoading={gamesLoading}
-                gamesError={gamesError}
-                categories={categories}
-                games={games}
-                userData={userData}
-              />
-            </div>
-          </Headroom>
-        )}
-        {useWindowSize() > 500 && (
+    <Router>
+      {useWindowSize() <= 500 ? (
+        <Headroom>
           <div className="sticky-navbar">
             <NavigationBar
               categoriesLoading={categoriesLoading}
@@ -188,64 +162,84 @@ const App = () => {
               userData={userData}
             />
           </div>
-        )}
-        <div className="height">
-          <Sidebar
+        </Headroom>
+      ) : (
+        <div className="sticky-navbar">
+          <NavigationBar
             categoriesLoading={categoriesLoading}
             categoriesError={categoriesError}
             gamesLoading={gamesLoading}
             gamesError={gamesError}
             categories={categories}
             games={games}
-            redirectToLogin={redirectToLogin}
+            userData={userData}
           />
-          <div className="content-wrapper">
-            <ClassCarousel />
-            <Switch>
-              <Route exact path="/">
-                {localStorage.getItem("token") &&
-                JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <>{userData.id && <Home userID={parseInt(userData.id)} />}</>
-                ) : (
-                  <Redirect to="/login" />
-                )}
-              </Route>
-
-              <Route path="/signup">
-                {localStorage.getItem("token") &&
-                JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <Redirect to="/" />
-                ) : (
-                  <Register />
-                )}
-              </Route>
-
-              <Route path="/login">
-                {localStorage.getItem("token") &&
-                JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <Redirect to="/" />
-                ) : (
-                  <Login redirectToHome={redirectToHome} />
-                )}
-              </Route>
-
-              <Route path="/about" component={About} />
-              <Route path="/dev-interface">
-                {localStorage.getItem("token") &&
-                JSON.parse(localStorage.getItem("token")).isLogged ? (
-                  <DevInterface />
-                ) : (
-                  <Redirect to="/login" />
-                )}
-              </Route>
-
-              <Route component={NoMatch} />
-            </Switch>
-          </div>
-          <Footer />
         </div>
-      </Router>
-    </ApolloProvider>
+      )}
+      <div className="height">
+        <Sidebar
+          categoriesLoading={categoriesLoading}
+          categoriesError={categoriesError}
+          gamesLoading={gamesLoading}
+          gamesError={gamesError}
+          categories={categories}
+          games={games}
+          redirectToLogin={redirectToLogin}
+        />
+        <div className="content-wrapper">
+          <ClassCarousel />
+          <Switch>
+            <Route exact path="/">
+              {localStorage.getItem("token") &&
+              JSON.parse(localStorage.getItem("token")).isLogged ? (
+                <>
+                  {userData.id && (
+                    <Home
+                      // getUserData={getUserData}
+                      userID={parseInt(userData.id)}
+                    />
+                  )}
+                </>
+              ) : (
+                <Redirect to="/login" />
+              )}
+            </Route>
+
+            <Route path="/signup">
+              {localStorage.getItem("token") &&
+              JSON.parse(localStorage.getItem("token")).isLogged ? (
+                <Redirect to="/" />
+              ) : (
+                <Register />
+              )}
+            </Route>
+
+            <Route path="/login">
+              {localStorage.getItem("token") &&
+              JSON.parse(localStorage.getItem("token")).isLogged ? (
+                <Redirect to="/" />
+              ) : (
+                <Login redirectToHome={redirectToHome} />
+              )}
+            </Route>
+
+            <Route path="/about" component={About} />
+
+            <Route path="/dev-interface">
+              {localStorage.getItem("token") &&
+              JSON.parse(localStorage.getItem("token")).isLogged ? (
+                <DevInterface />
+              ) : (
+                <Redirect to="/login" />
+              )}
+            </Route>
+
+            <Route component={NoMatch} />
+          </Switch>
+        </div>
+        <Footer />
+      </div>
+    </Router>
   );
 };
 
