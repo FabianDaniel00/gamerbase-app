@@ -127,7 +127,7 @@ const App = () => {
           response
             .json()
             .then((result) => {
-              setUserData(result.data.userFromToken);
+              setUserData({ ...result.data.userFromToken, error: false });
             })
             .catch(() => {
               localStorage.clear();
@@ -138,6 +138,7 @@ const App = () => {
           setUserData({
             userName: <i className="error">[{error.message}]</i>,
             id: <i className="error">[{error.message}]</i>,
+            error: true,
           });
         });
     }
@@ -185,6 +186,7 @@ const App = () => {
           categories={categories}
           games={games}
           redirectToLogin={redirectToLogin}
+          userData={userData}
         />
         <div className="content-wrapper">
           <ClassCarousel />
@@ -192,14 +194,7 @@ const App = () => {
             <Route exact path="/">
               {localStorage.getItem("token") &&
               JSON.parse(localStorage.getItem("token")).isLogged ? (
-                <>
-                  {userData.id && (
-                    <Home
-                      // getUserData={getUserData}
-                      userID={parseInt(userData.id)}
-                    />
-                  )}
-                </>
+                <>{userData.id && <Home userID={parseInt(userData.id)} />}</>
               ) : (
                 <Redirect to="/login" />
               )}

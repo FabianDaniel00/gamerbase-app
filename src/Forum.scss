@@ -29,6 +29,7 @@ p {
 .posts-loading,
 .comments-loading {
   text-align: center;
+  color: #d9d9d9;
 }
 
 .post-writer {
@@ -43,6 +44,11 @@ p {
 .postcontent {
   margin-left: 15px;
   font-size: large;
+  word-wrap: break-word;
+}
+
+.posttitle {
+  word-wrap: break-word;
 }
 
 .create-post {
@@ -71,6 +77,12 @@ p {
   margin-top: 10px;
   border-left: 7px solid #4dff9d;
   margin-left: 4%;
+}
+
+.comment-content {
+  margin-left: 10px;
+  word-wrap: break-word;
+  line-height: normal;
 }
 
 .comment-count {
@@ -220,13 +232,24 @@ p {
   margin-bottom: 10px;
 }
 
+.no-comment {
+  color: #d9d9d9;
+  text-align: center;
+}
+
 .show-comments {
   margin: 0 auto;
-  width: 130px;
+  display: grid;
   text-align: center;
   color: #d9d9d9;
   &:hover {
     opacity: 70%;
     cursor: pointer;
   }
+}
+
+.unshow-comments:hover,
+.up-to-post:hover {
+  opacity: 70%;
+  cursor: pointer;
 }

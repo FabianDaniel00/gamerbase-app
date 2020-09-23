@@ -67,6 +67,9 @@ class SideNav extends Component {
     ) {
       this.setState({ activePath: "/" });
     }
+    if (this.props.userData && this.props.userData.error) {
+      this.setState({ activePath: "/login" });
+    }
   }
 
   render() {

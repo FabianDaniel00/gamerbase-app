@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { gql, useQuery, useMutation } from "@apollo/client";
+import { gql, useQuery, useMutation, useLazyQuery } from "@apollo/client";
 import { Button, Alert, Modal } from "react-bootstrap";
+import { Link as ScrollLink } from "react-scroll";
 import "./Forum.scss";
 
 const POSTS = gql`
@@ -25,8 +26,8 @@ const POSTS = gql`
 `;
 
 const COMMENTS = gql`
-  {
-    allComments(limit: 0, page: 1) {
+  query($post: Int!) {
+    allComments(limit: 0, page: 1, post: $post) {
       comments {
         id
         poster {
@@ -155,6 +156,7 @@ export const Forum = ({ userID }) => {
   const [postsLoading_, setPostsLoading_] = useState(Boolean);
   const [postCount, setPostCount] = useState(Number);
   const [posts, setPosts] = useState([]);
+  const [showComments, setShowComments] = useState([]);
   const [comments, setComments] = useState([]);
   const [postLikes, setPostLikes] = useState([]);
   const [postLikesCount_, setPostLikesCount_] = useState(Number);
@@ -162,6 +164,7 @@ export const Forum = ({ userID }) => {
   const [postTitle, setPostTitle] = useState(String);
   const [postContent, setPostContent] = useState(String);
   const [showPostAlert, setShowPostAlert] = useState(Boolean);
+  const [showEditPostAlert, setShowEditPostAlert] = useState(Boolean);
   const [postAlertResponse, setPostAlertResponse] = useState(String);
   const [postAlertVariant, setPostAlertVariant] = useState(String);
   const [showNewPost, setShowNewPost] = useState(Boolean);
@@ -169,6 +172,7 @@ export const Forum = ({ userID }) => {
   const [commentLikesCount_, setCommentLikesCount_] = useState(Number);
   const [comment, setComment] = useState(String);
   const [showCommentAlert, setShowCommentAlert] = useState(Boolean);
+  const [showEditCommentAlert, setShowEditCommentAlert] = useState(Boolean);
   const [commentAlertResponse, setCommentAlertResponse] = useState(String);
   const [commentAlertVariant, setCommentAlertVariant] = useState(String);
   const [errorMessage, setErrorMessage] = useState(String);
@@ -198,11 +202,10 @@ export const Forum = ({ userID }) => {
     refetch: refetchPosts,
   } = useQuery(POSTS, { variables: { limit: postsLimit } });
 
-  const {
-    loading: commentsLoading,
-    error: commentsError,
-    data: commentsData,
-  } = useQuery(COMMENTS);
+  const [
+    getComments,
+    { loading: commentsLoading, error: commentsError, data: commentsData },
+  ] = useLazyQuery(COMMENTS);
 
   const {
     loading: postLikesLoading,
@@ -240,18 +243,27 @@ export const Forum = ({ userID }) => {
   }, [postsData, postLikesData]);
 
   useEffect(() => {
-    // for(const i in posts) {
-      setPosts({...posts, posts: {showComments: false}});
-    // }
-  }, [posts]);
+    for (let i = 0; i < 5; i++) {
+      setShowComments((showComments) => [
+        ...showComments,
+        { show: false, showed: false },
+      ]);
+    }
+  }, [postsLimit]);
 
   useEffect(() => {
-    if (commentsData && commentLikesData) {
-      setComments(commentsData.allComments.comments);
+    if (commentLikesData) {
       setCommentLikes(commentLikesData.allCommentLikes.commentLikes);
       setCommentLikesCount_(commentLikesData.allCommentLikes.total);
     }
-  }, [commentsData, commentLikesData]);
+  }, [commentLikesData]);
+
+  useEffect(() => {
+    if (commentsData) {
+      let comments_ = comments.filter((comment) => comment.post.id !== postID);
+      setComments(comments_.concat(commentsData.allComments.comments));
+    }
+  }, [commentsData]);
 
   const IsPostLiked = (props) => {
     const { post_ID, postLikesCount } = props;
@@ -351,6 +363,7 @@ export const Forum = ({ userID }) => {
       setPostAlertResponse("Title or content cannot be empty!");
       setPostAlertVariant("danger");
       setShowPostAlert(true);
+      setCreatePostLoading(false);
     } else {
       createPost({
         variables: { posterID: userID, title: postTitle, content: postContent },
@@ -376,36 +389,40 @@ export const Forum = ({ userID }) => {
   }
 
   function submitPostEdit() {
-    updatePost({
-      variables: {
-        id: postID,
-        posterID: userID,
-        title: postTitle,
-        content: postContent,
-      },
-      refetchQueries: [{ query: POSTS, variables: { limit: postsLimit } }],
-    })
-      .then(() => {
-        setUpdatePostLoading(false);
-        setPostTitle("");
-        setPostContent("");
+    if (!postTitle || !postContent) {
+      setShowEditPostAlert(true);
+      setCreatePostLoading(false);
+      setUpdatePostLoading(false);
+    } else {
+      updatePost({
+        variables: {
+          id: postID,
+          posterID: userID,
+          title: postTitle,
+          content: postContent,
+        },
+        refetchQueries: [{ query: POSTS, variables: { limit: postsLimit } }],
       })
-      .catch((error) => {
-        setUpdatePostLoading(false);
-        setErrorMessage(
-          `Something went wrong during editing the post! Error: ${error.message}`
-        );
-        setShowErrorModal(true);
-      });
+        .then(() => {
+          setUpdatePostLoading(false);
+          setPostTitle("");
+          setPostContent("");
+          setShowEditPostModal(false);
+        })
+        .catch((error) => {
+          setUpdatePostLoading(false);
+          setErrorMessage(
+            `Something went wrong during editing the post! Error: ${error.message}`
+          );
+          setShowErrorModal(true);
+        });
+    }
   }
 
   function DeletePost() {
     deletePost({
       variables: { id: postID, posterID: userID },
-      refetchQueries: [
-        // { query: COMMENTS },
-        { query: POSTS, variables: { limit: postsLimit } },
-      ],
+      refetchQueries: [{ query: POSTS, variables: { limit: postsLimit } }],
     })
       .then(() => {
         setDeletePostLoading(false);
@@ -420,7 +437,7 @@ export const Forum = ({ userID }) => {
   }
 
   const IsCommentLiked = (props) => {
-    const { comment_ID, commentLikesCount } = props;
+    const { comment_ID, commentLikesCount, post_ID } = props;
 
     let i = -1;
     let liked = false;
@@ -450,8 +467,9 @@ export const Forum = ({ userID }) => {
           <i
             onClick={() => {
               setCommentLikeLoading(true);
-              likeAComment(comment_ID);
+              likeAComment(comment_ID, post_ID);
               setCommentID(comment_ID);
+              setPostID(post_ID);
             }}
             className="error"
           >
@@ -468,8 +486,9 @@ export const Forum = ({ userID }) => {
           <i
             onClick={() => {
               setCommentLikeLoading(true);
-              likeAComment(comment_ID);
+              likeAComment(comment_ID, post_ID);
               setCommentID(comment_ID);
+              setPostID(post_ID);
             }}
             className="fas fa-thumbs-up likes"
           />{" "}
@@ -482,8 +501,9 @@ export const Forum = ({ userID }) => {
           <i
             onClick={() => {
               setCommentLikeLoading(true);
-              likeAComment(comment_ID);
+              likeAComment(comment_ID, post_ID);
               setCommentID(comment_ID);
+              setPostID(post_ID);
             }}
             className="far fa-thumbs-up likes"
           />{" "}
@@ -493,14 +513,14 @@ export const Forum = ({ userID }) => {
     }
   };
 
-  function likeAComment(comment_ID) {
+  function likeAComment(comment_ID, post_ID) {
     commentLike({
       variables: {
         likerID: userID,
         commentID: comment_ID,
       },
       refetchQueries: [
-        { query: COMMENTS },
+        { query: COMMENTS, variables: { post: post_ID } },
         { query: COMMENT_LIKES, variables: { liker: userID } },
       ],
     })
@@ -517,11 +537,12 @@ export const Forum = ({ userID }) => {
       setCommentAlertResponse("Comment cannot be empty!");
       setCommentAlertVariant("danger");
       setShowCommentAlert(true);
+      setCreateCommentLoading(false);
     } else {
       createComment({
         variables: { posterID: userID, postID: post_ID, content: comment },
         refetchQueries: [
-          { query: COMMENTS },
+          { query: COMMENTS, variables: { post: post_ID } },
           { query: POSTS, variables: { limit: postsLimit } },
         ],
       })
@@ -544,32 +565,39 @@ export const Forum = ({ userID }) => {
   }
 
   function submitCommentEdit() {
-    updateComment({
-      variables: {
-        id: commentID,
-        posterID: userID,
-        content: comment,
-      },
-      refetchQueries: [{ query: COMMENTS }],
-    })
-      .then(() => {
-        setUpdateCommentLoading(false);
-        setComment("");
+    if (!comment) {
+      setShowEditCommentAlert(true);
+      setCreateCommentLoading(false);
+      setUpdateCommentLoading(false);
+    } else {
+      updateComment({
+        variables: {
+          id: commentID,
+          posterID: userID,
+          content: comment,
+        },
+        refetchQueries: [{ query: COMMENTS, variables: { post: postID } }],
       })
-      .catch((error) => {
-        setUpdateCommentLoading(false);
-        setErrorMessage(
-          `Something went wrong during editing the comment! Error: ${error.message}`
-        );
-        setShowErrorModal(true);
-      });
+        .then(() => {
+          setUpdateCommentLoading(false);
+          setComment("");
+          setShowEditCommentModal(false);
+        })
+        .catch((error) => {
+          setUpdateCommentLoading(false);
+          setErrorMessage(
+            `Something went wrong during editing the comment! Error: ${error.message}`
+          );
+          setShowErrorModal(true);
+        });
+    }
   }
 
   function DeleteComment() {
     deleteComment({
       variables: { id: commentID, posterID: userID },
       refetchQueries: [
-        { query: COMMENTS },
+        { query: COMMENTS, variables: { post: postID } },
         { query: POSTS, variables: { limit: postsLimit } },
       ],
     })
@@ -600,7 +628,12 @@ export const Forum = ({ userID }) => {
             type="text"
             onChange={(event) => {
               setShowPostAlert(false);
+              setShowEditPostAlert(false);
               setPostTitle(event.target.value);
+            }}
+            onClick={() => {
+              setShowPostAlert(false);
+              setShowEditPostAlert(false);
             }}
             value={postTitle}
             className="post-modaltitle"
@@ -616,6 +649,11 @@ export const Forum = ({ userID }) => {
           />
         </Modal.Body>
         <Modal.Footer>
+          {showEditPostAlert && (
+            <Alert className="post-alert" variant="danger">
+              Title or content cannot be empty!
+            </Alert>
+          )}
           <Button variant="info" onClick={() => setShowEditPostModal(false)}>
             Cancel
           </Button>
@@ -624,7 +662,6 @@ export const Forum = ({ userID }) => {
             onClick={() => {
               setUpdatePostLoading(true);
               submitPostEdit();
-              setShowEditPostModal(false);
             }}
           >
             Save Changes
@@ -643,13 +680,22 @@ export const Forum = ({ userID }) => {
           <textarea
             onChange={(event) => {
               setShowCommentAlert(false);
+              setShowEditCommentAlert(false);
               setComment(event.target.value);
+            }}
+            onClick={() => {
+              setShowEditCommentAlert(false);
             }}
             value={comment}
             className="comment-modaltextarea"
           />
         </Modal.Body>
         <Modal.Footer>
+          {showEditCommentAlert && (
+            <Alert className="post-alert" variant="danger">
+              Content cannot be empty!
+            </Alert>
+          )}
           <Button variant="info" onClick={() => setShowEditCommentModal(false)}>
             Cancel
           </Button>
@@ -658,22 +704,9 @@ export const Forum = ({ userID }) => {
             onClick={() => {
               setUpdateCommentLoading(true);
               submitCommentEdit();
-              setShowEditCommentModal(false);
             }}
           >
             Save Changes
-          </Button>
-        </Modal.Footer>
-      </Modal>
-
-      <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)}>
-        <Modal.Header closeButton>
-          <Modal.Title>Error!</Modal.Title>
-        </Modal.Header>
-        <Modal.Body>{errorMessage}</Modal.Body>
-        <Modal.Footer>
-          <Button variant="info" onClick={() => setShowErrorModal(false)}>
-            OK
           </Button>
         </Modal.Footer>
       </Modal>
@@ -743,6 +776,9 @@ export const Forum = ({ userID }) => {
               setShowPostAlert(false);
               setPostTitle(event.target.value);
             }}
+            onClick={() => {
+              setShowPostAlert(false);
+            }}
             value={postTitle}
             className="post-title"
           />
@@ -782,6 +818,18 @@ export const Forum = ({ userID }) => {
         </Modal.Footer>
       </Modal>
 
+      <Modal show={showErrorModal} onHide={() => setShowErrorModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>Error!</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>{errorMessage}</Modal.Body>
+        <Modal.Footer>
+          <Button variant="info" onClick={() => setShowErrorModal(false)}>
+            OK
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
       <div className="create-post">
         <Button
           onClick={() => setShowNewPost(true)}
@@ -802,9 +850,9 @@ export const Forum = ({ userID }) => {
           <i>[{postsError.message}]</i>
         </p>
       )}
-      {posts.map((post, key) => {
+      {posts.map((post, postKey) => {
         return (
-          <div className="hole-post" key={key}>
+          <div id={`post${postKey}`} className="hole-post" key={postKey}>
             <div className="post">
               {parseInt(post.poster.id) === userID ? (
                 <>
@@ -849,7 +897,7 @@ export const Forum = ({ userID }) => {
               ) : (
                 <div className="date-post">Edited at {post.updated}</div>
               )}
-              <h3>{post.title}</h3>
+              <h3 className="posttitle">{post.title}</h3>
               <div className="postcontent">{post.content}</div>
               <div>
                 <div className="comment-count">
@@ -859,105 +907,167 @@ export const Forum = ({ userID }) => {
               </div>
             </div>
             <div className="comments">
-              {commentsLoading && (
+              {commentsLoading && postID === post.id && (
                 <p className="comments-loading">
-                  Comments loading <i className="fas fa-spinner fa-spin" />
+                  Loading comments <i className="fas fa-spinner fa-spin" />
                 </p>
               )}
-              {commentsError && (
+              {commentsError && postID === post.id && (
                 <p className="error">
                   <i>[{commentsError.message}]</i>
                 </p>
               )}
-              {showComments
-                ? (
-                    <div
-                      onClick={() => (showComments = false)}
-                      className="show-comments"
-                    >
-                      Unshow comments
-                    </div>
-                  &&
-                  comments
-                    .filter((comment) => post.id === comment.post.id)
-                    .map((filteredComment, key) => {
-                      return (
-                        <div className="comment" key={key}>
-                          {parseInt(filteredComment.poster.id) === userID ? (
-                            <>
-                              <div>
-                                {deleteCommentLoading &&
-                                filteredComment.id === commentID ? (
-                                  <i className="fas fa-spinner fa-spin remove-comment" />
-                                ) : (
-                                  <i
-                                    onClick={() => {
-                                      setCommentID(filteredComment.id);
-                                      setPostID(post.id);
-                                      setShowCommentConfirmModal(true);
-                                      setShowCommentAlert(false);
-                                    }}
-                                    className="far fa-trash-alt remove-comment"
-                                  />
-                                )}
-                                {updateCommentLoading &&
-                                filteredComment.id === commentID ? (
-                                  <i className="fas fa-spinner fa-spin edit-comment" />
-                                ) : (
-                                  <i
-                                    onClick={() => {
-                                      setCommentID(filteredComment.id);
-                                      setPostID(post.id);
-                                      setComment(filteredComment.content);
-                                      setShowEditCommentModal(true);
-                                      setEditing(true);
-                                    }}
-                                    className="fas fa-pencil-alt edit-comment"
-                                  />
-                                )}
-                              </div>
-                              <b>
-                                <i className="my-comment">
-                                  {filteredComment.poster.userName}:
-                                </i>
-                              </b>
-                            </>
-                          ) : (
-                            <b>
-                              <i>{filteredComment.poster.userName}:</i>
-                            </b>
-                          )}
-                          {filteredComment.updated ===
-                          filteredComment.created ? (
-                            <div className="date-comment">
-                              Created at {filteredComment.created}
-                            </div>
-                          ) : (
-                            <div className="date-comment">
-                              Edited at {filteredComment.updated}
-                            </div>
-                          )}
-                          <div>
-                            &nbsp;&nbsp;&nbsp;&nbsp;{filteredComment.content}
-                            <IsCommentLiked
-                              comment_ID={filteredComment.id}
-                              commentLikesCount={filteredComment.likes}
-                            />
-                          </div>
-                        </div>
-                      );
-                    }))
-                : post.comments !== 0 && (
+              {showComments[postKey].show ? (
+                <>
+                  {!commentsLoading && (
                     <div
                       onClick={() => {
-                        showComments = true;
-                        console.log(showComments);
+                        let showComments_ = [...showComments];
+                        showComments_[postKey].show = false;
+                        setShowComments(showComments_);
                       }}
                       className="show-comments"
                     >
-                      Show Comments
+                      Hide comments <i className="fas fa-arrow-circle-up" />
                     </div>
                   )}
+                  {comments
+                    .filter((comment) => post.id === comment.post.id)
+                    .map((filteredComment, commentKey) => {
+                      return (
+                        <>
+                          {commentKey % 10 === 0 && commentKey !== 0 && (
+                            <ScrollLink
+                              to={`post${postKey}`}
+                              smooth={true}
+                              duration={500}
+                              className="up-to-post"
+                              style={{
+                                color: "#d9d9d9",
+                                display: "grid",
+                                textAlign: "center",
+                                marginTop: "5px",
+                              }}
+                            >
+                              Up to the post
+                              <i className="fas fa-arrow-circle-up" />
+                            </ScrollLink>
+                          )}
+                          <div className="comment" key={commentKey}>
+                            {parseInt(filteredComment.poster.id) === userID ? (
+                              <>
+                                <div>
+                                  {deleteCommentLoading &&
+                                  filteredComment.id === commentID ? (
+                                    <i className="fas fa-spinner fa-spin remove-comment" />
+                                  ) : (
+                                    <i
+                                      onClick={() => {
+                                        setCommentID(filteredComment.id);
+                                        setPostID(post.id);
+                                        setShowCommentConfirmModal(true);
+                                        setShowCommentAlert(false);
+                                      }}
+                                      className="far fa-trash-alt remove-comment"
+                                    />
+                                  )}
+                                  {updateCommentLoading &&
+                                  filteredComment.id === commentID ? (
+                                    <i className="fas fa-spinner fa-spin edit-comment" />
+                                  ) : (
+                                    <i
+                                      onClick={() => {
+                                        setCommentID(filteredComment.id);
+                                        setPostID(post.id);
+                                        setComment(filteredComment.content);
+                                        setShowEditCommentModal(true);
+                                        setEditing(true);
+                                      }}
+                                      className="fas fa-pencil-alt edit-comment"
+                                    />
+                                  )}
+                                </div>
+                                <b>
+                                  <i className="my-comment">
+                                    {filteredComment.poster.userName}:
+                                  </i>
+                                </b>
+                              </>
+                            ) : (
+                              <b>
+                                <i>{filteredComment.poster.userName}:</i>
+                              </b>
+                            )}
+                            {filteredComment.updated ===
+                            filteredComment.created ? (
+                              <div className="date-comment">
+                                Created at {filteredComment.created}
+                              </div>
+                            ) : (
+                              <div className="date-comment">
+                                Edited at {filteredComment.updated}
+                              </div>
+                            )}
+                            <div>
+                              <div className="comment-content">
+                                {filteredComment.content}
+                              </div>
+                              <IsCommentLiked
+                                comment_ID={filteredComment.id}
+                                commentLikesCount={filteredComment.likes}
+                                post_ID={post.id}
+                              />
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })}
+                  {post.comments > 5 && !commentsLoading && (
+                    <ScrollLink
+                      onClick={() => {
+                        let showComments_ = [...showComments];
+                        showComments_[postKey].show = false;
+                        setShowComments(showComments_);
+                      }}
+                      to={`post${postKey}`}
+                      smooth={true}
+                      duration={500}
+                      className="unshow-comments"
+                      style={{
+                        color: "#d9d9d9",
+                        display: "grid",
+                        textAlign: "center",
+                        marginTop: "5px",
+                      }}
+                    >
+                      Hide comments
+                      <i className="fas fa-arrow-circle-up" />
+                    </ScrollLink>
+                  )}
+                </>
+              ) : post.comments !== 0 ? (
+                <>
+                  {!commentsLoading && (
+                    <div
+                      onClick={() => {
+                        setPostID(post.id);
+                        let showComments_ = [...showComments];
+                        if (!showComments[postKey].showed) {
+                          showComments_[postKey].showed = true;
+                          getComments({ variables: { post: post.id } });
+                        }
+                        showComments_[postKey].show = true;
+                        setShowComments(showComments_);
+                      }}
+                      className="show-comments"
+                    >
+                      Show Comments <i className="fas fa-arrow-circle-down" />
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="no-comment">There is no comment!</div>
+              )}
 
               <div className="add-comment">
                 <label className="comments-label">
@@ -980,6 +1090,7 @@ export const Forum = ({ userID }) => {
 
                 <Button
                   onClick={() => {
+                    setPostID(post.id);
                     setCreateCommentLoading(true);
                     submitComment(post.id);
                   }}
